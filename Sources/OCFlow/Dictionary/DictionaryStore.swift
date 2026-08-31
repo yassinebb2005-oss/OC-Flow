@@ -44,77 +44,7 @@ final class DictionaryStore {
 
     private init() {
         load()
-        seedStarterEntries()
         startWatching()
-    }
-
-    // MARK: - Starter entries
-
-    /// Office and engineering vocabulary the recognizer reliably mangles in German
-    /// dictation. Seeded once, additively: entries the user already has are left alone,
-    /// and anything seeded can be edited or deleted like a hand-made entry. Terms bias
-    /// the engine toward hearing the word at all; corrections catch what still slips
-    /// through, and one multi-part trigger like "git hub" also matches "github" and
-    /// "Git-Hub", so each line covers every spelling the engine produces.
-    private static let starterEntries: [DictionaryEntry] = [
-        // Tools und Dienste — Korrekturen normalisieren die Schreibweise.
-        .correction(hear: "git hub", write: "GitHub"),
-        .correction(hear: "git lab", write: "GitLab"),
-        .correction(hear: "ripo", write: "Repo"),
-        .correction(hear: "repo", write: "Repo"),
-        .correction(hear: "pull request", write: "Pull Request"),
-        .correction(hear: "readme", write: "README"),
-        .correction(hear: "api", write: "API"),
-        .correction(hear: "json", write: "JSON"),
-        .correction(hear: "mac os", write: "macOS"),
-        .correction(hear: "i phone", write: "iPhone"),
-        .correction(hear: "i pad", write: "iPad"),
-        .correction(hear: "chat gpt", write: "ChatGPT"),
-        .correction(hear: "cloud code", write: "Claude Code"),
-        .correction(hear: "g mail", write: "Gmail"),
-        .correction(hear: "google drive", write: "Google Drive"),
-        .correction(hear: "power point", write: "PowerPoint"),
-        .correction(hear: "linked in", write: "LinkedIn"),
-        .correction(hear: "whats app", write: "WhatsApp"),
-        .correction(hear: "you tube", write: "YouTube"),
-        .correction(hear: "xcode", write: "Xcode"),
-        .correction(hear: "vs code", write: "VS Code"),
-        .correction(hear: "type script", write: "TypeScript"),
-        .correction(hear: "java script", write: "JavaScript"),
-        .correction(hear: "oc flow", write: "OC Flow"),
-        // Eingedeutschte Verben, die die Erkennung phonetisch verschreibt.
-        .correction(hear: "puschen", write: "pushen"),
-        .correction(hear: "gepuscht", write: "gepusht"),
-        .correction(hear: "kommitten", write: "committen"),
-        .correction(hear: "kommittet", write: "committet"),
-        .correction(hear: "kommitte", write: "committe"),
-        // "Jason" ist auch ein Vorname — deshalb aus, aber einschaltbar.
-        DictionaryEntry(kind: .correction, write: "JSON", hear: "jason", isEnabled: false),
-        // Begriffe: reine Engine-Vorprägung, damit richtig gehört wird.
-        .term("GitHub"), .term("Repo"), .term("Pull Request"), .term("Branch"),
-        .term("Commit"), .term("committen"), .term("pushen"), .term("mergen"),
-        .term("deployen"), .term("Backend"), .term("Frontend"), .term("Terminal"),
-        .term("Slack"), .term("Claude"), .term("OC Flow"), .term("O.C. Hairsystems"),
-    ]
-
-    /// Runs once per Mac. Additive and conservative: an entry whose trigger or word the
-    /// user already has — in any spelling — is skipped, so a hand-tuned dictionary stays
-    /// hand-tuned.
-    private func seedStarterEntries() {
-        let seededKey = "dictionarySeededV1"
-        guard !UserDefaults.standard.bool(forKey: seededKey) else { return }
-        defer { UserDefaults.standard.set(true, forKey: seededKey) }
-
-        let existingWrites = Set(entries.map { $0.write.lowercased() })
-        let existingHears = Set(entries.compactMap { $0.hear.isEmpty ? nil : $0.hear.lowercased() })
-
-        let fresh = Self.starterEntries.filter { seed in
-            !existingWrites.contains(seed.write.lowercased())
-                && (seed.hear.isEmpty || !existingHears.contains(seed.hear.lowercased()))
-        }
-        guard !fresh.isEmpty else { return }
-        entries.append(contentsOf: fresh)
-        save()
     }
 
     // MARK: - Editing
@@ -149,11 +79,26 @@ final class DictionaryStore {
         }
     }
 
+    /// Built-in vocabulary plus the user's entries. The user's dictionary wins on
+    /// collision: an entry with the same trigger or word replaces the built-in one, so
+    /// anything the app ships can be overridden — or effectively deleted — by hand.
+    /// `entries` (and the panel showing it) stays purely the user's own words.
+    private var effectiveEntries: [DictionaryEntry] {
+        let userHears = Set(entries.compactMap { $0.hear.isEmpty ? nil : $0.hear.lowercased() })
+        let userWrites = Set(entries.map { $0.write.lowercased() })
+        let builtin = BuiltinVocabulary.entries.filter { candidate in
+            candidate.kind == .correction
+                ? !userHears.contains(candidate.hear.lowercased())
+                : !userWrites.contains(candidate.write.lowercased())
+        }
+        return builtin + entries
+    }
+
     /// A corrector over the current entries. Rebuilt on demand — compiling a few dozen small
     /// regexes is cheap next to transcription, and caching it invites staleness.
-    var corrector: DictionaryCorrector { DictionaryCorrector(entries: entries) }
+    var corrector: DictionaryCorrector { DictionaryCorrector(entries: effectiveEntries) }
 
-    var biasPhrases: [String] { DictionaryCorrector.biasPhrases(from: entries) }
+    var biasPhrases: [String] { DictionaryCorrector.biasPhrases(from: effectiveEntries) }
 
     // MARK: - Persistence
 
