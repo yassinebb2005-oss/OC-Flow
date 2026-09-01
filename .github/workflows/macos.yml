@@ -38,5 +38,5 @@ jobs:
       # does not have. The dictionary target is deliberately platform-neutral, so it
       # builds and tests anywhere.
       - name: Test the dictionary target
-        run: swift test --filter VectorTests
+        run: swift test
 
