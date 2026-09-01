@@ -44,6 +44,15 @@ enum PushToTalkKey: String, CaseIterable, Sendable {
     /// Swallowing `fn` would break fn+arrow, fn+delete and the emoji picker, so we let it
     /// through. Dedicated right-hand modifiers are safe to consume.
     var shouldConsumeEvent: Bool { self != .fn }
+
+    /// Whether holding this key is only push-to-talk when nothing else is pressed with it.
+    ///
+    /// `fn` is a modifier people use constantly on a laptop: fn plus an arrow, fn plus
+    /// delete, fn plus a function key. Every one of those raises and drops the same flag a
+    /// held `fn` does, so without this a normal shortcut started a recording, and releasing
+    /// it pasted whatever the microphone caught into the focused field. The dedicated
+    /// right-hand modifiers are chords nobody presses by accident.
+    var requiresSoloPress: Bool { self == .fn }
 }
 
 /// Watches for a held modifier key using a `CGEventTap`.
@@ -57,16 +66,25 @@ final class HotkeyMonitor {
     private var runLoopSource: CFRunLoopSource?
     private var isPressed = false
 
+    /// Set while a hold is being ignored because another key joined it. Cleared on release,
+    /// so the stray release doesn't end a dictation that never started.
+    private var isAbandoned = false
+
     var key: PushToTalkKey = .rightOption
     var onPress: (() -> Void)?
     var onRelease: (() -> Void)?
+    /// Called when a hold turns out to be part of a shortcut. The dictation must be dropped,
+    /// not finished: nothing the microphone caught in those milliseconds was meant as text.
+    var onAbandon: (() -> Void)?
 
     /// - Returns: `false` if the tap couldn't be created — almost always missing Accessibility permission.
     @discardableResult
     func start() -> Bool {
         stop()
 
-        let mask = (1 << CGEventType.flagsChanged.rawValue)
+        // keyDown as well as flagsChanged: it is the only way to notice that a held key is
+        // part of a shortcut rather than a push-to-talk hold.
+        let mask = (1 << CGEventType.flagsChanged.rawValue) | (1 << CGEventType.keyDown.rawValue)
         let refcon = Unmanaged.passUnretained(self).toOpaque()
 
         guard let tap = CGEvent.tapCreate(
@@ -114,6 +132,7 @@ final class HotkeyMonitor {
         tap = nil
         runLoopSource = nil
         isPressed = false
+        isAbandoned = false
     }
 
     // MARK: - Tap callback
@@ -123,6 +142,25 @@ final class HotkeyMonitor {
         // The system disables a tap that runs too slowly or is interrupted; re-arm it.
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
+            // While the tap was off, the release we were waiting for went past unseen. Left
+            // alone, the recording runs forever with no key able to stop it — which is
+            // exactly what a stuck timer in the window looks like.
+            if isPressed {
+                isPressed = false
+                isAbandoned = false
+                Log.hotkey.info("tap was disabled mid-hold — dropping the recording")
+                onAbandon?()
+            }
+            return false
+        }
+
+        // A key pressed while the hold is running means this was a shortcut, not dictation.
+        if type == .keyDown {
+            if isPressed, key.requiresSoloPress, !isAbandoned {
+                isAbandoned = true
+                Log.hotkey.info("hold abandoned — \(self.key.displayName) was part of a shortcut")
+                onAbandon?()
+            }
             return false
         }
 
@@ -132,7 +170,15 @@ final class HotkeyMonitor {
         guard nowPressed != isPressed else { return false }
         isPressed = nowPressed
 
-        if nowPressed { onPress?() } else { onRelease?() }
+        if nowPressed {
+            isAbandoned = false
+            onPress?()
+        } else if isAbandoned {
+            // Already dropped when the other key arrived; the release is just bookkeeping.
+            isAbandoned = false
+        } else {
+            onRelease?()
+        }
 
         return key.shouldConsumeEvent
     }
