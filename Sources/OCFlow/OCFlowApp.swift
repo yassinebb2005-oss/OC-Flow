@@ -75,6 +75,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             retryActivation()
         }
 
+        // Load the cleanup model now rather than on the first dictation. It costs about
+        // five seconds of background work once, and the alternative is spending those
+        // seconds while the user waits for their first sentence to land.
+        if Settings.shared.cleanupEnabled && Settings.shared.smartCleanup {
+            ModelSessionPool.warmUp()
+        }
+
         // Write the dashboard up front so the menu item always opens something, even
         // before the first dictation.
         RunLog.regenerate()
