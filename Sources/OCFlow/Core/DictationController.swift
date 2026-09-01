@@ -229,6 +229,17 @@ final class DictationController {
         // it and pasting the same utterance twice. The window is wide: Parakeet transcribes
         // inside `finish()`, and smart cleanup adds up to 4s on top.
         guard state.isActive, state != .finishing else { return }
+
+        // A hold of a few milliseconds is a mis-press, not an utterance. Sending it through
+        // the recognizer is worse than dropping it: with almost no audio the engine never
+        // produces a final result, `finish()` never returns, and the app sits in `.finishing`
+        // with a timer counting up and no key able to stop it.
+        if let holdStarted, Date().timeIntervalSince(holdStarted) < Self.minimumHold {
+            Log.hotkey.info("hold too short to be speech — dropping")
+            cancelDictation()
+            return
+        }
+
         state = .finishing
         capture.stop()
         level = 0
@@ -242,8 +253,14 @@ final class DictationController {
             recorded = await feedTask?.value ?? []
             feedTask = nil
 
-            await engine?.finish()
-            await consumeTask?.value
+            // Bounded, because `finish()` is not guaranteed to return. Apple's recognizer
+            // stays silent on audio it can make nothing of, and an unbounded await there is
+            // a recording that never ends.
+            guard await finalizeEngine(within: Self.finalizeBudget) else {
+                Log.speech.info("recognizer did not finalize in time — dropping the recording")
+                cancelDictation()
+                return
+            }
             consumeTask = nil
             engine = nil
 
@@ -288,6 +305,35 @@ final class DictationController {
     private func abandonDictation() {
         if case .idle = state { return }
         cancelDictation()
+    }
+
+    /// Shortest hold taken seriously as speech.
+    private static let minimumHold: TimeInterval = 0.25
+
+    /// How long the recognizer may take to produce its final result after the audio ends.
+    private static let finalizeBudget: Duration = .seconds(6)
+
+    /// - Returns: `false` if the recognizer did not finalize within `budget`.
+    private func finalizeEngine(within budget: Duration) async -> Bool {
+        let work = Task { @MainActor in
+            await self.engine?.finish()
+            await self.consumeTask?.value
+        }
+        let deadline = Task {
+            try? await Task.sleep(for: budget)
+        }
+
+        // Whichever lands first decides. The loser is cancelled: unlike the cleanup model,
+        // a recognizer that has already gone quiet has nothing left to contribute.
+        return await withTaskGroup(of: Bool.self) { group in
+            group.addTask { await work.value; return true }
+            group.addTask { await deadline.value; return false }
+            let finished = await group.next() ?? false
+            group.cancelAll()
+            work.cancel()
+            deadline.cancel()
+            return finished
+        }
     }
 
     private func cancelDictation() {
