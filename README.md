@@ -61,7 +61,7 @@ Antwortet das Modell nicht schnell genug, nimmt die App den Rohtext mit Regel-Au
 tccutil reset Accessibility com.oc-hairsystems.ocflow
 ```
 
-Danach die Systemeinstellungen komplett beenden (⌘Q), neu öffnen und die Berechtigung neu erteilen. Wichtig: immer mit der Bundle-ID zurücksetzen, ein nacktes `tccutil reset Accessibility` löscht die Einträge sämtlicher Apps.
+Danach die Systemeinstellungen komplett beenden (⌘Q), neu öffnen und die Berechtigung neu erteilen. `tccutil` braucht dazu die installierte App, um die Bundle-ID aufzulösen: auf einem Rechner ohne `/Applications/OC Flow.app` scheitert es mit „No such bundle identifier". Wichtig: immer mit der Bundle-ID zurücksetzen, ein nacktes `tccutil reset Accessibility` löscht die Einträge sämtlicher Apps.
 
 Wer das nach jedem Update erlebt, signiert ad hoc: ohne Zertifikat im Schlüsselbund ändert sich die Signatur bei jedem Bauen, und TCC hängt die Freigabe an die Signatur. Einmalig behoben mit
 
