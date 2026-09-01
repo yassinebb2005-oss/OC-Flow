@@ -139,12 +139,24 @@ public extension DictionaryCorrector {
     public static let biasLimit = 40
 
     /// - Returns: the correct spellings — `.term` words and the *write* side of corrections —
-    ///   most recently useful first, capped at `biasLimit`.
+    ///   capped at `biasLimit`, terms before corrections.
+    ///
+    /// Terms go first because the two kinds need the slots for different reasons. A term is
+    /// a word the engine may not consider at all — "Zweithaar", a product name — and biasing
+    /// is the only thing that can put it in the running. A correction's write side is
+    /// guaranteed by the correction pass afterwards whether the engine heard it or not, so
+    /// spending a slot on "GitHub" buys a nudge for something already settled.
+    ///
+    /// Without this split the 60 shipped corrections filled all 40 slots and every term,
+    /// including the caller's own dictionary, never reached the engine.
     public static func biasPhrases(from entries: [DictionaryEntry]) -> [String] {
+        let enabled = entries.filter(\.isEnabled)
+        let byKind = enabled.filter { $0.kind == .term } + enabled.filter { $0.kind == .correction }
+
         var seen = Set<String>()
         var phrases: [String] = []
 
-        for entry in entries where entry.isEnabled {
+        for entry in byKind {
             let phrase = entry.write.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !phrase.isEmpty, seen.insert(phrase.lowercased()).inserted else { continue }
             phrases.append(phrase)

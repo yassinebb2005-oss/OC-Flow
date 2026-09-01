@@ -84,21 +84,34 @@ final class DictionaryStore {
     /// anything the app ships can be overridden — or effectively deleted — by hand.
     /// `entries` (and the panel showing it) stays purely the user's own words.
     private var effectiveEntries: [DictionaryEntry] {
+        surviving(BuiltinVocabulary.entries) + entries
+    }
+
+    /// The same set, the user's own words first.
+    ///
+    /// Only biasing cares about the order, and there it decides who gets one of the 40 slots.
+    /// The correction pass sorts by trigger length itself, so this ordering cannot change what
+    /// gets rewritten.
+    private var biasEntries: [DictionaryEntry] {
+        entries + surviving(BuiltinVocabulary.entries)
+    }
+
+    /// Drops the built-in entries the user has overridden by hand.
+    private func surviving(_ builtin: [DictionaryEntry]) -> [DictionaryEntry] {
         let userHears = Set(entries.compactMap { $0.hear.isEmpty ? nil : $0.hear.lowercased() })
         let userWrites = Set(entries.map { $0.write.lowercased() })
-        let builtin = BuiltinVocabulary.entries.filter { candidate in
+        return builtin.filter { candidate in
             candidate.kind == .correction
                 ? !userHears.contains(candidate.hear.lowercased())
                 : !userWrites.contains(candidate.write.lowercased())
         }
-        return builtin + entries
     }
 
     /// A corrector over the current entries. Rebuilt on demand — compiling a few dozen small
     /// regexes is cheap next to transcription, and caching it invites staleness.
     var corrector: DictionaryCorrector { DictionaryCorrector(entries: effectiveEntries) }
 
-    var biasPhrases: [String] { DictionaryCorrector.biasPhrases(from: effectiveEntries) }
+    var biasPhrases: [String] { DictionaryCorrector.biasPhrases(from: biasEntries) }
 
     // MARK: - Persistence
 
