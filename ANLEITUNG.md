@@ -20,7 +20,7 @@ Es öffnet sich ein Fenster, dort auf „Installieren" klicken und warten, bis e
 
 ## Schritt 3: App herunterladen und bauen
 
-Diese drei Befehle nacheinander einfügen, nach jedem Enter drücken:
+Diese vier Befehle nacheinander einfügen, nach jedem Enter drücken:
 
 ```bash
 git clone https://github.com/yassinebb2005-oss/OC-Flow.git
@@ -31,10 +31,16 @@ cd OC-Flow
 ```
 
 ```bash
+bash Tools/create-signing-cert.sh
+```
+
+```bash
 make install
 ```
 
-Der letzte Befehl arbeitet ein paar Minuten. Am Ende startet O.C. Flow von selbst und oben in der Menüleiste erscheint ein kleines O.C.
+Der dritte Befehl legt ein Zertifikat auf deinem Mac an und fragt dabei nach deinem Passwort. Das ist kostenlos und sorgt dafür, dass du die Berechtigung aus Schritt 4 nur ein einziges Mal erteilen musst, auch nach künftigen Updates.
+
+Der letzte Befehl arbeitet ein paar Minuten. Fragt der Schlüsselbund dabei, ob „codesign" den Schlüssel benutzen darf, auf **Immer erlauben** klicken. Am Ende startet O.C. Flow von selbst und oben in der Menüleiste erscheint ein kleines O.C.
 
 ## Schritt 4: Zwei Berechtigungen erteilen
 
@@ -72,23 +78,15 @@ Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues,
 cd ~/OC-Flow && git pull && make install
 ```
 
-Das holt den neuen Code, baut ihn und startet die App neu. Dauert ein bis zwei Minuten.
+Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts, dafür sorgt das Zertifikat aus Schritt 3.
 
-**Danach einmal die Sprechtaste freigeben.** Nach jedem Update erkennt macOS die App als neu und die alte Freigabe gilt nicht mehr. Merkst du daran, dass beim Halten der Sprechtaste nichts passiert, obwohl der Schalter in den Systemeinstellungen weiter auf an steht. So setzt du es zurück:
-
-```bash
-tccutil reset Accessibility com.oc-hairsystems.ocflow
-```
-
-Dann Systemeinstellungen komplett beenden mit ⌘Q, die App beenden (O.C. in der Menüleiste ▸ „OC Flow beenden") und aus dem Ordner Programme neu öffnen. Die Abfrage für die Bedienungshilfen kommt wieder, dort erlauben. Danach läuft es.
-
-**Das Freigeben ein für alle Mal loswerden:** einmal dieses Skript laufen lassen.
+**Falls du die App installiert hast, als es den Zertifikat-Schritt noch nicht gab:** dann reagiert die Sprechtaste nach dem Update nicht mehr, weil macOS die App als eine neue ansieht. Einmal nachholen, danach ist Ruhe:
 
 ```bash
-cd ~/OC-Flow && bash Tools/create-signing-cert.sh
+cd ~/OC-Flow && bash Tools/create-signing-cert.sh && make install
 ```
 
-Es erstellt ein eigenes Signierzertifikat auf deinem Mac, kostenlos. Danach bleibt die App für macOS bei jedem Update dieselbe, und die Freigabe hält. Beim nächsten `make install` fragt der Schlüsselbund einmal, ob codesign den Schlüssel benutzen darf, dort auf „Immer erlauben" klicken.
+Anschließend die Berechtigung ein letztes Mal erteilen: Systemeinstellungen ▸ Datenschutz & Sicherheit ▸ Bedienungshilfen. Steht **OC Flow** dort noch in der Liste, mit dem Minus-Knopf entfernen, dann die App beenden und aus dem Ordner Programme neu öffnen. Die Abfrage kommt wieder, dort erlauben.
 
 ## Fertig
 

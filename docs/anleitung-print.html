@@ -45,10 +45,11 @@
   footer { margin-top: 6pt; font-size: 8.5pt; color: #8a8a8e; border-top: .5pt solid #e5e5ea;
            padding-top: 6pt; }
   h2.sec { font-size: 12.2pt; margin: 0 0 4pt; }
+  h2.sec.neuseite { break-before: page; margin-top: 0; }
   .menus { display: flex; gap: 13pt; align-items: flex-start; margin: 5pt 0 4pt; page-break-inside: avoid; }
   .menucol { flex: 1; }
   .menucol .cap { font-size: 8.8pt; color: #48484a; margin: 4pt 0 0; line-height: 1.4; }
-  .menucol.shot img { width: 70%; border-radius: 6pt; border: .5pt solid #d1d1d6; display: block; }
+  .menucol.shot img { width: 100%; border-radius: 6pt; border: .5pt solid #d1d1d6; display: block; }
   .menucol .cap2 { font-size: 9.2pt; color: #1c1c1e; margin: 0 0 6pt; }
   .menucol .cap2:last-child { color: #48484a; font-size: 8.8pt; margin: 0; }
   .menu { background: #2c2c2e; border-radius: 6pt; padding: 8pt 9pt; min-height: 46pt; color: #f2f2f7;
@@ -90,12 +91,17 @@ Text steht da, wo dein Cursor blinkt.</p>
 
 <div class="step">
   <h2><span class="num">3</span> App herunterladen und bauen</h2>
-  <p>Diese drei Befehle nacheinander einfügen, nach jedem <kbd>Enter</kbd> drücken:</p>
+  <p>Diese vier Befehle nacheinander einfügen, nach jedem <kbd>Enter</kbd> drücken:</p>
   <pre>git clone https://github.com/yassinebb2005-oss/OC-Flow.git</pre>
   <pre>cd OC-Flow</pre>
+  <pre>bash Tools/create-signing-cert.sh</pre>
   <pre>make install</pre>
-  <p>Der letzte Befehl arbeitet ein paar Minuten. Am Ende startet O.C. Flow von selbst und oben
-  in der Menüleiste erscheint ein kleines O.C.</p>
+  <p>Der dritte Befehl legt ein Zertifikat auf deinem Mac an und fragt nach deinem Passwort.
+  Kostenlos, und dadurch musst du die Berechtigung aus Schritt 4 nur ein einziges Mal
+  erteilen, auch nach künftigen Updates.</p>
+  <p>Der letzte Befehl arbeitet ein paar Minuten. Fragt der Schlüsselbund, ob „codesign" den
+  Schlüssel benutzen darf, auf <strong>Immer erlauben</strong> klicken. Am Ende startet O.C.
+  Flow von selbst und oben in der Menüleiste erscheint ein kleines O.C.</p>
 </div>
 
 <div class="step">
@@ -157,12 +163,23 @@ und schau auf die Zeile <strong>Automatisch aufräumen</strong>:</p>
   deines Macs siehst du unter Apfelmenü &#9656; Über diesen Mac.</p>
 </div>
 
-<h2 class="sec">Neue Version holen</h2>
+<h2 class="sec neuseite">Neue Version holen</h2>
 <p>Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, im
 Terminal:</p>
 <pre>cd ~/OC-Flow &amp;&amp; git pull &amp;&amp; make install</pre>
-<p>Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Nichts neu zu erlauben,
+<p>Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts,
 dafür sorgt das Zertifikat aus Schritt 3.</p>
+
+<div class="tip nobreakpage">
+  <h3>Installiert, als es den Zertifikat-Schritt noch nicht gab?</h3>
+  <p>Dann reagiert die Sprechtaste nach dem Update nicht mehr, weil macOS die App als eine
+  neue ansieht. Einmal nachholen, danach ist Ruhe:</p>
+  <pre>cd ~/OC-Flow &amp;&amp; bash Tools/create-signing-cert.sh &amp;&amp; make install</pre>
+  <p>Anschließend die Berechtigung ein letztes Mal erteilen: Systemeinstellungen &#9656;
+  Datenschutz &amp; Sicherheit &#9656; Bedienungshilfen. Steht <strong>OC Flow</strong> dort
+  noch in der Liste, mit dem Minus-Knopf entfernen, App beenden und aus dem Ordner Programme
+  neu öffnen. Die Abfrage kommt wieder, dort erlauben.</p>
+</div>
 
 <div class="done">
   <h2>Fertig</h2>
