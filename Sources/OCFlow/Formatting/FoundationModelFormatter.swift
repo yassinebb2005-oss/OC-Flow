@@ -219,12 +219,14 @@ actor CleanupEngine {
 
     /// Everything worth doing between the key going down and the user stopping.
     ///
-    /// Speech is dead time for the model, usually a few seconds of it, and a reload costs 7
-    /// to 13s. Spending the talking time on the reload is the difference between a sentence
-    /// that lands cleaned and one that falls back to the rules.
+    /// Deliberately only session setup, no generation. Loading the model here looked like
+    /// free real estate — speech is dead time for the model — but measured on a MacBook Air
+    /// with 8 GB it backfired: the load takes 15s and saturates the machine, so the
+    /// recognizer's own finalize crawled from 0.2s to 11s and the utterance landed 23s after
+    /// the key came up. A cold model now simply costs the first cleanup its budget, which is
+    /// bounded and does not slow anything else down.
     func prepare() async {
         prewarm()
-        await warmUp()
     }
 
     /// Builds a session so its setup is done before the user stops talking.
