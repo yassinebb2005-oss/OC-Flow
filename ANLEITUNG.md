@@ -74,18 +74,32 @@ Deshalb der Test, der zählt: diktiere einen Satz und schau auf die Uhr. Ist der
 
 Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese Zeile im Terminal einfügen:
 
+Erst in den Ordner wechseln:
+
 ```bash
-cd "$(find ~ -maxdepth 3 -type d -name OC-Flow -print -quit 2>/dev/null)" && git pull && make install
+cd ~/OC-Flow || cd ~/Desktop/OC-Flow
 ```
 
-Die Zeile sucht den Ordner selbst, egal wo du ihn beim Installieren abgelegt hast. Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts, dafür sorgt das Zertifikat aus Schritt 3.
+Dann aktualisieren:
 
-Kommt eine Fehlermeldung wie „no such file or directory", dann gibt es den Ordner auf diesem Mac nicht mehr. Kein Problem: einfach Schritt 3 von oben nochmal machen, das ersetzt das Update.
+```bash
+git pull && make install
+```
+
+Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts, dafür sorgt das Zertifikat aus Schritt 3.
+
+Sagt der erste Befehl „no such file or directory", liegt der Ordner woanders. Dann suchst du ihn so:
+
+```bash
+find ~ -maxdepth 3 -type d -name OC-Flow 2>/dev/null
+```
+
+Kommt dabei nichts, gibt es ihn auf diesem Mac nicht mehr. Kein Problem: einfach Schritt 3 von oben nochmal machen, das ersetzt das Update.
 
 **Falls du die App installiert hast, als es den Zertifikat-Schritt noch nicht gab:** dann reagiert die Sprechtaste nach dem Update nicht mehr, weil macOS die App als eine neue ansieht. Einmal nachholen, danach ist Ruhe:
 
 ```bash
-cd "$(find ~ -maxdepth 3 -type d -name OC-Flow -print -quit 2>/dev/null)" && bash Tools/create-signing-cert.sh && make install
+bash Tools/create-signing-cert.sh && make install
 ```
 
 Anschließend die Berechtigung ein letztes Mal erteilen: Systemeinstellungen ▸ Datenschutz & Sicherheit ▸ Bedienungshilfen. Steht **OC Flow** dort noch in der Liste, mit dem Minus-Knopf entfernen, dann die App beenden und aus dem Ordner Programme neu öffnen. Die Abfrage kommt wieder, dort erlauben.
