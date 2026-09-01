@@ -96,6 +96,7 @@ final class DictationController {
     }
 
     func deactivate() {
+        Log.hotkey.info("hotkey deactivated")
         hotkey.stop()
         cancelDictation()
     }
@@ -238,6 +239,9 @@ final class DictationController {
         // the recognizer is worse than dropping it: with almost no audio the engine never
         // produces a final result, `finish()` never returns, and the app sits in `.finishing`
         // with a timer counting up and no key able to stop it.
+        let held = holdStarted.map { Date().timeIntervalSince($0) } ?? -1
+        Log.hotkey.info("release after \(held, format: .fixed(precision: 3))s — state \(String(describing: self.state), privacy: .public)")
+
         if let holdStarted, Date().timeIntervalSince(holdStarted) < Self.minimumHold {
             Log.hotkey.info("hold too short to be speech — dropping")
             cancelDictation()
@@ -309,6 +313,7 @@ final class DictationController {
     /// fraction of a second before the other key landed, and pasting one into whatever has
     /// focus is the worst thing this app can do.
     private func abandonDictation() {
+        Log.hotkey.info("abandon requested — state \(String(describing: self.state), privacy: .public)")
         if case .idle = state { return }
         cancelDictation()
     }
@@ -326,7 +331,9 @@ final class DictationController {
         _ work: @escaping @Sendable () async throws -> T
     ) async throws -> T {
         let job = Task { try await work() }
-        let deadline = Task { try? await Task.sleep(for: budget) }
+        // Detached for the same reason as in `wrapUp`: a deadline on the actor it polices is
+        // no deadline at all.
+        let deadline = Task.detached(priority: .userInitiated) { try? await Task.sleep(for: budget) }
 
         return try await withThrowingTaskGroup(of: T.self) { group in
             group.addTask { try await job.value }
@@ -354,13 +361,20 @@ final class DictationController {
     ///   calls into Apple's recognizer, and both have been seen not to return on audio it can
     ///   make nothing of. A 47ms tap after a long pause was enough.
     private func wrapUp(within budget: Duration) async -> [AudioChunk]? {
+        Log.speech.info("wrapping up — draining and finalizing")
+
         let work = Task { @MainActor in
             let drained = await self.feedTask?.value ?? []
             await self.engine?.finish()
             await self.consumeTask?.value
             return drained
         }
-        let deadline = Task {
+
+        // Detached, and that is the whole point. `Task { … }` inherits the enclosing actor,
+        // so a deadline created here ran *on the main actor* — the same actor the work it was
+        // meant to police runs on. Blocked main actor, sleeping stopwatch: measured 60s for a
+        // 6s budget. A detached task sleeps on the global executor and fires regardless.
+        let deadline = Task.detached(priority: .userInitiated) {
             try? await Task.sleep(for: budget)
         }
 
