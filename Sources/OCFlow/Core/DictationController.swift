@@ -337,6 +337,7 @@ final class DictationController {
     }
 
     private func cancelDictation() {
+        Log.speech.info("dictation dropped")
         capture.stop()
         audioContinuation?.finish()
         audioContinuation = nil
@@ -354,17 +355,30 @@ final class DictationController {
         level = 0
     }
 
+    /// Unwinds a start-up that raced the key coming back up.
+    ///
+    /// Two rules here, both learned the hard way. The state goes back to idle *first*: it is
+    /// what the window and the HUD read, so it must never wait on a framework call. And the
+    /// recognizer gets a deadline, because `finish()` is not guaranteed to return on audio it
+    /// can make nothing of — on a 42ms tap it simply stayed silent, and with the reset at the
+    /// bottom of this function the timer in the window counted up for as long as the app ran.
     private func teardown() async {
+        Log.speech.info("start-up raced the release — dropping the recording")
+
+        state = .idle
+        transcript = ""
+        level = 0
+
         capture.stop()
         audioContinuation?.finish()
         audioContinuation = nil
-        await feedTask?.value
+        _ = await feedTask?.value
         feedTask = nil
-        await engine?.finish()
+
+        _ = await finalizeEngine(within: Self.finalizeBudget)
         engine = nil
         consumeTask?.cancel()
         consumeTask = nil
-        state = .idle
     }
 
     // MARK: - Helpers
