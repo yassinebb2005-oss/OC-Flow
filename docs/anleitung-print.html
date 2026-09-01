@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>O.C. Flow installieren</title>
+<style>
+  @page { size: A4; margin: 17mm 17mm 13mm 17mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10.2pt; line-height: 1.45; color: #1c1c1e; margin: 0;
+  }
+  .brand { font-size: 8.5pt; letter-spacing: .16em; text-transform: uppercase;
+           color: #8a8a8e; font-weight: 600; }
+  h1 { font-size: 24pt; line-height: 1.1; margin: 3pt 0 5pt; letter-spacing: -.4pt; }
+  .lead { font-size: 11.2pt; color: #3a3a3c; margin: 0 0 9pt; max-width: 46em; }
+  .rule { height: 3pt; background: #1c1c1e; width: 46pt; margin: 0 0 12pt; }
+  .req { background: #f4f4f6; border-left: 3pt solid #1c1c1e;
+         padding: 6pt 10pt; margin: 0 0 9pt; font-size: 10pt; }
+  .step { margin: 0 0 13pt; page-break-inside: avoid; }
+  .step h2 { font-size: 12.2pt; margin: 0 0 5pt; display: flex; align-items: baseline; gap: 8pt; }
+  .num { display: inline-block; min-width: 17pt; height: 17pt; line-height: 17pt;
+         text-align: center; background: #1c1c1e; color: #fff; border-radius: 50%;
+         font-size: 9pt; font-weight: 700; flex: none; }
+  .step p { margin: 0 0 6pt; }
+  code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; }
+  pre { background: #1c1c1e; color: #f2f2f7; padding: 7pt 11pt; border-radius: 4pt;
+        font-size: 9.5pt; margin: 5pt 0; overflow-wrap: anywhere; }
+  ol.sub { margin: 6pt 0 0; padding-left: 16pt; }
+  ol.sub li { margin-bottom: 3pt; }
+  kbd { font-family: inherit; font-weight: 600; background: #f4f4f6;
+        border: .5pt solid #d1d1d6; border-radius: 3pt; padding: 0 4pt; }
+  .tip { break-before: page; margin-bottom: 13pt; border: .8pt solid #d1d1d6; border-left: 3pt solid #1c1c1e; border-radius: 4pt;
+         padding: 8pt 11pt; margin: 0 0 9pt; page-break-inside: avoid; }
+  .tip h3 { font-size: 12pt; margin: 0 0 4pt; }
+  .tip p { margin: 0 0 4pt; }
+  .tip p:last-child { margin: 0; }
+  .done { margin-top: 0; border: .8pt solid #d1d1d6; border-radius: 5pt; padding: 10pt 12pt; margin-top: 6pt;
+          page-break-inside: avoid; }
+  .done h2 { font-size: 12.2pt; margin: 0 0 4pt; }
+  .done p { margin: 0 0 5pt; }
+  .done p:last-child { margin-bottom: 0; }
+  footer { margin-top: 6pt; font-size: 8.5pt; color: #8a8a8e; border-top: .5pt solid #e5e5ea;
+           padding-top: 6pt; }
+  h2.sec { font-size: 12.2pt; margin: 0 0 6pt; }
+  .menus { display: flex; gap: 13pt; align-items: flex-start; margin: 8pt 0 7pt; page-break-inside: avoid; }
+  .menucol { flex: 1; }
+  .menucol .cap { font-size: 8.8pt; color: #48484a; margin: 6pt 0 0; line-height: 1.4; }
+  .menucol.shot img { width: 100%; border-radius: 6pt; border: .5pt solid #d1d1d6; display: block; }
+  .menucol .cap2 { font-size: 9.2pt; color: #1c1c1e; margin: 0 0 6pt; }
+  .menucol .cap2:last-child { color: #48484a; font-size: 8.8pt; margin: 0; }
+  .menu { background: #2c2c2e; border-radius: 6pt; padding: 8pt 9pt; min-height: 46pt; color: #f2f2f7;
+          font-size: 8.6pt; line-height: 1.35; }
+  .menu .row { display: flex; gap: 5pt; padding: 1.5pt 0; }
+  .menu .tick { width: 8pt; flex: none; }
+  .menu .off { color: #8e8e93; }
+  .menu .hint { color: #8e8e93; font-size: 7.8pt; padding: 1pt 0 0 13pt; }
+  .badge { display: block; width: fit-content; margin: 0 0 5pt; font-size: 8pt; font-weight: 700; letter-spacing: .06em;
+           text-transform: uppercase; padding: 1pt 5pt; border-radius: 3pt; }
+  .badge.bad { background: #f4f4f6; color: #1c1c1e; border: .5pt solid #d1d1d6; }
+  .badge.good { background: #1c1c1e; color: #fff; }
+  strong { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="brand">O.C. Hairsystems</div>
+<h1>O.C. Flow installieren</h1>
+<div class="rule"></div>
+<p class="lead">Fünf Minuten, einmalig. Danach hältst du eine Taste, sprichst, lässt los, und der
+Text steht da, wo dein Cursor blinkt.</p>
+
+<div class="req"><strong>Voraussetzung:</strong> macOS 26 oder neuer. Prüfen unter Apfelmenü &#9656; Über diesen Mac. Steht da eine kleinere Zahl, zuerst macOS aktualisieren.</div>
+
+<div class="step">
+  <h2><span class="num">1</span> Terminal öffnen</h2>
+  <p><kbd>Cmd</kbd> + <kbd>Leertaste</kbd> drücken, „Terminal" tippen, <kbd>Enter</kbd>.</p>
+</div>
+
+<div class="step">
+  <h2><span class="num">2</span> Apples Entwickler-Werkzeuge holen</h2>
+  <p>Diesen Befehl einfügen und <kbd>Enter</kbd> drücken:</p>
+  <pre>xcode-select --install</pre>
+  <p>Es öffnet sich ein Fenster. Dort auf „Installieren" klicken und warten, bis es fertig ist,
+  das dauert ein paar Minuten. Kommt stattdessen eine Meldung wie „already installed", ist alles
+  gut und du gehst weiter zu Schritt 3.</p>
+</div>
+
+<div class="step">
+  <h2><span class="num">3</span> App herunterladen und bauen</h2>
+  <p>Diese drei Befehle nacheinander einfügen, nach jedem <kbd>Enter</kbd> drücken:</p>
+  <pre>git clone https://github.com/yassinebb2005-oss/OC-Flow.git</pre>
+  <pre>cd OC-Flow</pre>
+  <pre>make install</pre>
+  <p>Der letzte Befehl arbeitet ein paar Minuten. Am Ende startet O.C. Flow von selbst und oben
+  in der Menüleiste erscheint ein kleines O.C.</p>
+</div>
+
+<div class="step">
+  <h2><span class="num">4</span> Zwei Berechtigungen erteilen</h2>
+  <ol class="sub">
+    <li>Es öffnet sich eine Abfrage für die <strong>Bedienungshilfen</strong>. Falls nicht:
+    Systemeinstellungen &#9656; Datenschutz &amp; Sicherheit &#9656; Bedienungshilfen. Dort
+    <strong>OC Flow</strong> einschalten.</li>
+    <li>Die App <strong>einmal beenden und neu starten</strong>: auf das O.C. in der Menüleiste
+    klicken &#9656; „OC Flow beenden", dann im Ordner Programme wieder öffnen.</li>
+    <li>Jetzt in irgendein Textfeld klicken, die <strong>rechte <kbd>&#8997;</kbd>-Taste</strong>
+    gedrückt halten und einen Satz sagen. Beim ersten Mal fragt macOS nach dem
+    <strong>Mikrofon</strong>. Erlauben, dann klappt es ab dem zweiten Versuch.</li>
+  </ol>
+</div>
+
+<div class="tip">
+  <h3>Lieber <kbd>fn</kbd> statt <kbd>&#8997;</kbd>?</h3>
+  <p>Im O.C.-Flow-Fenster oben rechts auf das <strong>Zahnrad</strong>, dann unter
+  <strong>Sprechtaste</strong> auf „fn" klicken. Greift sofort, kein Neustart. Derselbe Schalter
+  sitzt im Menüleisten-Menü unter „Push-to-talk key". <kbd>fn</kbd> bleibt normal benutzbar:
+  fn + Pfeiltasten, fn + Entf, Emoji-Picker.</p>
+</div>
+
+<h2 class="sec">Apple Intelligence einschalten</h2>
+<p>Damit die App den Text aufräumt, also Füllwörter rauswirft, Kommas setzt und Versprecher
+korrigiert, muss <strong>Apple Intelligence</strong> an sein. Klick auf das O.C. in der Menüleiste
+und schau auf die Zeile <strong>Automatisch aufräumen</strong>:</p>
+
+<div class="menus">
+  <div class="menucol shot">
+    <span class="badge good">So soll es aussehen</span>
+    <img src="menue-aufraeumen-an.png" alt="Menüleisten-Menü von O.C. Flow">
+    <p class="cap"><strong>Text aufräumen</strong> und <strong>Automatisch aufräumen (KI auf dem
+    Gerät)</strong> beide angehakt und normal lesbar. Dann läuft es.</p>
+  </div>
+  <div class="menucol">
+    <p class="cap2"><span class="badge bad">Falls nicht</span>
+    Ist <strong>Automatisch aufräumen</strong> grau und darunter steht „Apple Intelligence ist in
+    den Systemeinstellungen ausgeschaltet", dann fehlt Apple Intelligence.</p>
+    <p class="cap2"><strong>So einschalten:</strong> Systemeinstellungen &#9656; Apple
+    Intelligence &amp; Siri &#9656; einschalten. Zurück im Menü <strong>Automatisch aufräumen</strong>
+    anhaken, fertig.</p>
+    <p class="cap2">Alles rechnet auf deinem Mac, nichts geht ins Internet.</p>
+  </div>
+</div>
+
+<div class="done">
+  <h2>Fertig</h2>
+  <p>Ab jetzt überall: Sprechtaste halten, sprechen, loslassen.</p>
+  <p><strong>Hakt etwas?</strong> Die README hat einen Abschnitt „Wenn etwas hakt". Oder frag Yassine.</p>
+</div>
+
+<footer>O.C. Flow &#183; Installationsanleitung &#183; github.com/yassinebb2005-oss/OC-Flow</footer>
+
+</body>
+</html>

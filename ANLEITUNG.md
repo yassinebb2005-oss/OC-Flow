@@ -42,10 +42,26 @@ Der letzte Befehl arbeitet ein paar Minuten. Am Ende startet O.C. Flow von selbs
 2. Die App **einmal beenden und neu starten**: auf das O.C. in der Menüleiste klicken ▸ „OC Flow beenden", dann im Ordner Programme wieder öffnen.
 3. Jetzt in irgendein Textfeld klicken, die **rechte ⌥-Taste** gedrückt halten und einen Satz sagen. Beim ersten Mal fragt macOS nach dem **Mikrofon** — erlauben, dann klappt es ab dem zweiten Versuch.
 
+## Sprechtaste umstellen
+
+Voreingestellt ist die rechte ⌥-Taste. Viele nehmen lieber **fn**. Umstellen: im O.C.-Flow-Fenster oben rechts auf das **Zahnrad**, dann unter **Sprechtaste** auf „fn" klicken. Es greift sofort, kein Neustart nötig. Der gleiche Schalter sitzt auch im Menüleisten-Menü unter „Push-to-talk key".
+
+fn bleibt dabei normal benutzbar, also fn + Pfeiltasten, fn + Entf und der Emoji-Picker.
+
+## Apple Intelligence einschalten
+
+Damit die App den Text aufräumt, also Füllwörter rauswirft, Kommas setzt und Versprecher korrigiert, muss **Apple Intelligence** an sein. Klick auf das O.C. in der Menüleiste und schau auf die Zeile **Automatisch aufräumen (KI auf dem Gerät)**.
+
+So soll es aussehen, beide Zeilen angehakt und normal lesbar:
+
+![Menüleisten-Menü mit aktivem Aufräumen](docs/menue-aufraeumen-an.png)
+
+Ist die Zeile stattdessen grau und darunter steht „Apple Intelligence ist in den Systemeinstellungen ausgeschaltet", dann Systemeinstellungen ▸ Apple Intelligence & Siri einschalten und zurück im Menü **Automatisch aufräumen** anhaken.
+
+Alles rechnet auf deinem Mac, nichts geht ins Internet.
+
 ## Fertig
 
-Ab jetzt überall: rechte ⌥ halten, sprechen, loslassen.
-
-Noch besser wird es, wenn **Apple Intelligence** an ist (Systemeinstellungen ▸ Apple Intelligence & Siri): Dann räumt die App den Text schlau auf — Füllwörter raus, Kommas rein, Versprecher korrigiert. Alles direkt auf deinem Mac, nichts geht ins Internet.
+Ab jetzt überall: Sprechtaste halten, sprechen, loslassen.
 
 **Hakt etwas?** In der [README](README.md) steht unter „Wenn etwas hakt", was zu tun ist — oder frag Yassine.
