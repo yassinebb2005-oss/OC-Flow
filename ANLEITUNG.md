@@ -60,6 +60,24 @@ Ist die Zeile stattdessen grau und darunter steht „Apple Intelligence ist in d
 
 Alles rechnet auf deinem Mac, nichts geht ins Internet.
 
+## Neue Version holen
+
+Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, im Terminal:
+
+```bash
+cd ~/OC-Flow && git pull && make install
+```
+
+Das holt den neuen Code, baut ihn und startet die App neu. Dauert ein bis zwei Minuten.
+
+**Danach einmal die Sprechtaste freigeben.** Nach jedem Update erkennt macOS die App als neu und die alte Freigabe gilt nicht mehr. Merkst du daran, dass beim Halten der Sprechtaste nichts passiert, obwohl der Schalter in den Systemeinstellungen weiter auf an steht. So setzt du es zurück:
+
+```bash
+tccutil reset Accessibility com.oc-hairsystems.ocflow
+```
+
+Dann Systemeinstellungen komplett beenden mit ⌘Q, die App beenden (O.C. in der Menüleiste ▸ „OC Flow beenden") und aus dem Ordner Programme neu öffnen. Die Abfrage für die Bedienungshilfen kommt wieder, dort erlauben. Danach läuft es.
+
 ## Fertig
 
 Ab jetzt überall: Sprechtaste halten, sprechen, loslassen.

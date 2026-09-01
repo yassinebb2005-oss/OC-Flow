@@ -31,6 +31,7 @@
   ol.sub li { margin-bottom: 3pt; }
   kbd { font-family: inherit; font-weight: 600; background: #f4f4f6;
         border: .5pt solid #d1d1d6; border-radius: 3pt; padding: 0 4pt; }
+  .tip.nobreakpage { break-before: auto; }
   .tip { break-before: page; margin-bottom: 13pt; border: .8pt solid #d1d1d6; border-left: 3pt solid #1c1c1e; border-radius: 4pt;
          padding: 8pt 11pt; margin: 0 0 9pt; page-break-inside: avoid; }
   .tip h3 { font-size: 12pt; margin: 0 0 4pt; }
@@ -43,11 +44,11 @@
   .done p:last-child { margin-bottom: 0; }
   footer { margin-top: 6pt; font-size: 8.5pt; color: #8a8a8e; border-top: .5pt solid #e5e5ea;
            padding-top: 6pt; }
-  h2.sec { font-size: 12.2pt; margin: 0 0 6pt; }
-  .menus { display: flex; gap: 13pt; align-items: flex-start; margin: 8pt 0 7pt; page-break-inside: avoid; }
+  h2.sec { font-size: 12.2pt; margin: 0 0 4pt; }
+  .menus { display: flex; gap: 13pt; align-items: flex-start; margin: 5pt 0 4pt; page-break-inside: avoid; }
   .menucol { flex: 1; }
-  .menucol .cap { font-size: 8.8pt; color: #48484a; margin: 6pt 0 0; line-height: 1.4; }
-  .menucol.shot img { width: 100%; border-radius: 6pt; border: .5pt solid #d1d1d6; display: block; }
+  .menucol .cap { font-size: 8.8pt; color: #48484a; margin: 4pt 0 0; line-height: 1.4; }
+  .menucol.shot img { width: 84%; border-radius: 6pt; border: .5pt solid #d1d1d6; display: block; }
   .menucol .cap2 { font-size: 9.2pt; color: #1c1c1e; margin: 0 0 6pt; }
   .menucol .cap2:last-child { color: #48484a; font-size: 8.8pt; margin: 0; }
   .menu { background: #2c2c2e; border-radius: 6pt; padding: 8pt 9pt; min-height: 46pt; color: #f2f2f7;
@@ -140,6 +141,23 @@ und schau auf die Zeile <strong>Automatisch aufräumen</strong>:</p>
     anhaken, fertig.</p>
     <p class="cap2">Alles rechnet auf deinem Mac, nichts geht ins Internet.</p>
   </div>
+</div>
+
+<h2 class="sec">Neue Version holen</h2>
+<p>Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, im
+Terminal:</p>
+<pre>cd ~/OC-Flow &amp;&amp; git pull &amp;&amp; make install</pre>
+<p>Das holt den neuen Code, baut ihn und startet die App neu, ein bis zwei Minuten.</p>
+
+<div class="tip nobreakpage">
+  <h3>Danach einmal die Sprechtaste freigeben</h3>
+  <p>Nach jedem Update erkennt macOS die App als neu, die alte Freigabe gilt nicht mehr. Du
+  merkst es daran, dass beim Halten der Sprechtaste nichts passiert, obwohl der Schalter in
+  den Systemeinstellungen weiter auf an steht.</p>
+  <pre>tccutil reset Accessibility com.oc-hairsystems.ocflow</pre>
+  <p>Dann Systemeinstellungen mit <kbd>&#8984;Q</kbd> beenden, die App beenden (O.C. in der
+  Menüleiste &#9656; „OC Flow beenden") und aus dem Ordner Programme neu öffnen. Die Abfrage
+  kommt wieder, dort erlauben.</p>
 </div>
 
 <div class="done">
