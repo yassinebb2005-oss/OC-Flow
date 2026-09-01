@@ -45,6 +45,7 @@ enum TranscriptionError: LocalizedError {
     case modelInstallFailed(String)
     case noAudioFormat
     case notRunning
+    case startTimedOut
 
     var errorDescription: String? {
         switch self {
@@ -54,6 +55,8 @@ enum TranscriptionError: LocalizedError {
             return "Couldn't install the speech model: \(detail)"
         case .noAudioFormat:
             return "No compatible audio format available for the speech engine."
+        case .startTimedOut:
+            return "The speech engine didn't start in time."
         case .notRunning:
             return "The transcription engine isn't running."
         }
