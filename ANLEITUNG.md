@@ -60,7 +60,7 @@ Ist die Zeile stattdessen grau und darunter steht „Apple Intelligence ist in d
 
 Alles rechnet auf deinem Mac, nichts geht ins Internet.
 
-**Wenn der Text lange braucht, lass das Aufräumen aus.** Das Modell belegt rund 3 GB Arbeitsspeicher. Ist der knapp, schiebt macOS es ständig raus und lädt es wieder, und dann wartest du pro Satz mehrere Sekunden. Auf einem Mac mit 8 GB ist das gemessen der Normalfall: mit Aufräumen 11 bis 23 Sekunden pro Satz, ohne Aufräumen 0,2 Sekunden. Mit 16 GB oder mehr sollte es glatt durchlaufen, das haben wir aber nicht selbst geprüft.
+**Wenn der Text lange braucht, lass das Aufräumen aus.** Das Modell belegt rund 3 GB Arbeitsspeicher. Ist der knapp, schiebt macOS es ständig raus und lädt es wieder, und dann wartest du pro Satz mehrere Sekunden. Auf einem Mac mit 8 GB ist das gemessen der Normalfall: mit Aufräumen 11 bis 23 Sekunden pro Satz, ohne Aufräumen 0,2 Sekunden. Auf einem Mac mit 16 GB haben wir es ausprobiert, dort kommt der Text ohne merkliche Wartezeit.
 
 Deshalb der Test, der zählt: diktiere einen Satz und schau auf die Uhr. Ist der Text nach einer guten Sekunde da, lass **Automatisch aufräumen** an. Dauert es länger, hak es ab. Du verlierst dabei nur das Feinschliff-Aufräumen, Satzzeichen und die Wörterbuch-Korrekturen macht die App weiterhin. Wie viel Speicher dein Mac hat, steht unter Apfelmenü ▸ Über diesen Mac.
 
