@@ -42,6 +42,35 @@ public enum CleanupGuard {
         case commentary
     }
 
+    /// Removes emphasis markers the response added on its own.
+    ///
+    /// Observed in the field: "Das ist jetzt mit KI" came back as "Das ist jetzt mit **KI**".
+    /// The model decided the word deserved emphasis, which is reasonable in a chat window and
+    /// wrong in dictation — the text lands in a form, an invoice, an email, where two literal
+    /// asterisks are just noise. The word check in `check(original:cleaned:)` cannot see it,
+    /// because asterisks are not words.
+    ///
+    /// Only markers the speaker did not dictate are removed, so a spoken asterisk survives.
+    /// Underscores are left alone entirely: they are ordinary characters in file names and
+    /// identifiers, and an unbalanced pair is not evidence of anything.
+    public static func strippingAddedEmphasis(from cleaned: String, original: String) -> String {
+        guard !original.contains("*"), cleaned.contains("*") else { return cleaned }
+
+        // Paired markers first, so "**KI**" does not leave a stray "*KI*" behind.
+        var result = cleaned
+        for pattern in ["\\*\\*(.+?)\\*\\*", "\\*(.+?)\\*"] {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators]) else {
+                continue
+            }
+            result = regex.stringByReplacingMatches(
+                in: result,
+                range: NSRange(result.startIndex..., in: result),
+                withTemplate: "$1"
+            )
+        }
+        return result
+    }
+
     public static func check(original: String, cleaned: String) -> Verdict {
         guard !cleaned.isEmpty else { return .unusable }
 
