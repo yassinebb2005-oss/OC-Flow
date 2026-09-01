@@ -145,26 +145,24 @@ und schau auf die Zeile <strong>Automatisch aufräumen</strong>:</p>
   </div>
 </div>
 
+<div class="tip nobreakpage">
+  <h3>Dauert der Text zu lange? Aufräumen aus</h3>
+  <p>Das Modell belegt rund 3 GB Arbeitsspeicher. Ist der knapp, lädt macOS es vor jedem Satz
+  neu. Auf einem Mac mit 8 GB gemessen: mit Aufräumen 11 bis 23 Sekunden pro Satz, ohne
+  Aufräumen 0,2 Sekunden. Mit 16 GB und mehr sollte es glatt laufen, selbst geprüft haben wir
+  das nicht.</p>
+  <p>Der Test, der zählt: einen Satz diktieren. Ist der Text nach etwa einer Sekunde da, lass
+  <strong>Automatisch aufräumen</strong> an. Dauert es länger, hak es ab. Satzzeichen und die
+  Wörterbuch-Korrekturen macht die App weiterhin, nur der Feinschliff fällt weg. Den Speicher
+  deines Macs siehst du unter Apfelmenü &#9656; Über diesen Mac.</p>
+</div>
+
 <h2 class="sec">Neue Version holen</h2>
 <p>Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, im
 Terminal:</p>
 <pre>cd ~/OC-Flow &amp;&amp; git pull &amp;&amp; make install</pre>
-<p>Das holt den neuen Code, baut ihn und startet die App neu, ein bis zwei Minuten.</p>
-
-<div class="tip nobreakpage">
-  <h3>Danach einmal die Sprechtaste freigeben</h3>
-  <p>Nach jedem Update erkennt macOS die App als neu, die alte Freigabe gilt nicht mehr. Du
-  merkst es daran, dass beim Halten der Sprechtaste nichts passiert, obwohl der Schalter in
-  den Systemeinstellungen weiter auf an steht.</p>
-  <pre>tccutil reset Accessibility com.oc-hairsystems.ocflow</pre>
-  <p>Dann Systemeinstellungen mit <kbd>&#8984;Q</kbd> beenden, die App beenden (O.C. in der
-  Menüleiste &#9656; „OC Flow beenden") und aus dem Ordner Programme neu öffnen. Die Abfrage
-  kommt wieder, dort erlauben.</p>
-  <p><strong>Ein für alle Mal loswerden:</strong> einmal
-  <code>bash Tools/create-signing-cert.sh</code> im Ordner ausführen. Das legt ein eigenes
-  Signierzertifikat an, kostenlos, danach bleibt die Freigabe über alle Updates hinweg
-  bestehen.</p>
-</div>
+<p>Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Nichts neu zu erlauben,
+dafür sorgt das Zertifikat aus Schritt 3.</p>
 
 <div class="done">
   <h2>Fertig</h2>
