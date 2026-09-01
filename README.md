@@ -49,6 +49,7 @@ Das Diktat geht nach der Erkennung durch Apples Sprachmodell auf dem Gerät:
 - Satzzeichen und Großschreibung werden gesetzt
 - Selbstkorrekturen greifen: „Schick das Dienstag, ach nee, Mittwoch" wird zu „Schick das Mittwoch"
 - Gesprochene Aufzählungen werden Listen
+- Auseinandergerissene Komposita werden zusammengesetzt: „Kosten Voranschlag" wird zu „Kostenvoranschlag"
 
 Antwortet das Modell nicht schnell genug, nimmt die App den Rohtext mit Regel-Aufräumen. Kein Diktat geht verloren.
 
