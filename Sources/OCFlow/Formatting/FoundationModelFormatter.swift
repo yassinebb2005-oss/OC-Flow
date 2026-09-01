@@ -51,8 +51,8 @@ struct FoundationModelFormatter: TextFormatter {
         // does not cancel the generation. That matters more than tidiness — the load is what
         // takes the time, and letting an abandoned first attempt run to completion is what
         // makes the *next* utterance fast instead of repeating the same cold start forever.
-        let work = Task { try await Self.clean(trimmed) }
-        let budget = await ModelSessionPool.timeout
+        let work = Task { try await CleanupEngine.shared.clean(trimmed) }
+        let budget = await CleanupEngine.shared.timeout
 
         do {
             let cleaned = try await withThrowingTaskGroup(of: String.self) { group in
@@ -103,14 +103,6 @@ struct FoundationModelFormatter: TextFormatter {
         }
     }
 
-    @MainActor
-    private static func clean(_ text: String) async throws -> String {
-        let session = ModelSessionPool.take() ?? Self.makeSession()
-        let cleaned = try await respond(with: session, to: text)
-        ModelSessionPool.markWarm()
-        return cleaned
-    }
-
     static func makeSession() -> LanguageModelSession {
         LanguageModelSession(instructions: """
             You clean up raw speech-to-text transcripts. You are a text processor, not an \
@@ -144,29 +136,6 @@ struct FoundationModelFormatter: TextFormatter {
             """)
     }
 
-    /// One minimal generation whose only job is to make the model resident.
-    ///
-    /// Runs the real instructions, so it loads exactly what the first dictation will need.
-    @MainActor
-    static func warmUpGeneration() async throws -> String {
-        try await respond(with: makeSession(), to: "okay")
-    }
-
-    @MainActor
-    private static func respond(with session: LanguageModelSession, to text: String) async throws -> String {
-        let response = try await session.respond(
-            to: "Clean up this transcript:\n\n\(text)",
-            options: GenerationOptions(
-                // Near-deterministic: this is a formatting pass, not a creative one.
-                temperature: 0.1,
-                // Cleanup should never be much longer than the input; this bounds a runaway.
-                maximumResponseTokens: 1_200
-            )
-        )
-
-        return response.content.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
     /// Puts a guard verdict into the log in the words of the failure it describes.
     ///
     /// Each case means something different for whether this is a bug: `invented` and
@@ -189,73 +158,107 @@ struct FoundationModelFormatter: TextFormatter {
 }
 
 
-/// Holds one prewarmed session so the model loads while the user is still talking.
+/// Owns every call into the on-device model, on its own executor.
 ///
-/// Session creation is the expensive step — visibly so: without this, every utterance
-/// pays the model load as a pause between key-release and the text landing. The
-/// controller calls `prewarm()` the moment dictation starts; by release the session is
-/// hot and `take()` hands it over. One-shot on purpose: a session accumulates its
-/// conversation as context, so reusing it across utterances would slowly poison the
-/// cleanup with earlier transcripts.
-@MainActor
-enum ModelSessionPool {
-    private static var warmed: LanguageModelSession?
+/// The isolation is the point, not tidiness. `LanguageModelSession.respond` is
+/// `nonisolated(nonsending)`, so it runs on whatever actor calls it — and while these calls
+/// lived on `@MainActor`, a generation ran *on the main thread*. The hotkey's `CGEventTap`
+/// callback also needs the main thread, so a cleanup in flight delayed every keystroke and
+/// click on the whole machine, not just in this app. Measured on a MacBook Air: 12.8s for
+/// the first generation. `LanguageModelSession` is `@unchecked Sendable` and
+/// `SystemLanguageModel` is `Sendable`, so nothing about the framework required main-actor
+/// isolation in the first place.
+///
+/// One prewarmed session is kept so the model loads while the user is still talking.
+/// One-shot on purpose: a session accumulates its conversation as context, so reusing it
+/// across utterances would slowly poison the cleanup with earlier transcripts.
+actor CleanupEngine {
+    static let shared = CleanupEngine()
 
-    /// How long a cleanup may take before the raw text beats making the user wait.
-    ///
-    /// Two budgets, because the first generation in a process pays for loading the model and
-    /// the rest don't. Measured on an M-series Mac with Apple Intelligence on: 5.5s cold,
-    /// 0.64s warm. A flat 4s therefore missed *every* cleanup — and worse, the timeout tore
-    /// down the load in flight, so the next utterance started cold again and the model never
-    /// once finished loading.
-    static var timeout: Duration { isWarm ? .seconds(4) : .seconds(15) }
+    private var warmed: LanguageModelSession?
+    private var isWarmingUp = false
 
     /// Whether a generation has run to completion in this process.
     ///
     /// `session.prewarm()` returns in about 10ms and does not load the weights; the load
-    /// happens inside the first `respond`, and costs about 5.5s. So "has the model ever
-    /// answered" is the only honest test for warm, and it's what picks the timeout budget.
-    private(set) static var isWarm = false
+    /// happens inside the first `respond`. So "has the model ever answered" is the only
+    /// honest test for warm, and it's what picks the timeout budget.
+    private(set) var isWarm = false
 
-    private static var isWarmingUp = false
+    /// How long a cleanup may take before the raw text beats making the user wait.
+    ///
+    /// Two budgets, because the first generation in a process pays for loading the model and
+    /// the rest don't. Measured with Apple Intelligence on: 5.5s cold and 0.64s warm on a
+    /// desk machine, 12.8s cold on a MacBook Air. A flat 4s therefore missed *every* cleanup
+    /// — and worse, the timeout tore down the load in flight, so the next utterance started
+    /// cold again and the model never once finished loading.
+    var timeout: Duration { isWarm ? .seconds(4) : .seconds(20) }
 
-    static func prewarm() {
+    /// Cleans one transcript. The caller races this against `timeout`.
+    func clean(_ text: String) async throws -> String {
+        let session = take() ?? FoundationModelFormatter.makeSession()
+        let cleaned = try await Self.respond(with: session, to: text)
+        isWarm = true
+        return cleaned
+    }
+
+    /// Builds a session so its setup is done before the user stops talking.
+    func prewarm() {
         guard FoundationModelFormatter.isAvailable, warmed == nil else { return }
         let session = FoundationModelFormatter.makeSession()
         session.prewarm()
         warmed = session
     }
 
-    /// Loads the model at launch, on a throwaway utterance, so the first real dictation pays
-    /// inference only.
-    ///
-    /// Without this the cost lands on whatever the user says first, which is exactly when
-    /// they are watching the text not appear.
-    static func warmUp() {
+    /// Loads the model on a throwaway utterance, so the first real dictation pays inference
+    /// only. Without it the cost lands on whatever the user says first, which is exactly
+    /// when they are watching the text not appear.
+    func warmUp() async {
         guard FoundationModelFormatter.isAvailable, !isWarm, !isWarmingUp else { return }
         isWarmingUp = true
 
-        Task { @MainActor in
-            let started = ContinuousClock.now
-            do {
-                _ = try await FoundationModelFormatter.warmUpGeneration()
-                isWarm = true
-                Log.speech.info("cleanup model warm after \(started.duration(to: .now).seconds, format: .fixed(precision: 2))s")
-            } catch {
-                // Nothing to do about it: the next real cleanup gets the cold budget and
-                // tries again. Worth seeing in the log, not worth telling the user.
-                Log.speech.info("cleanup model warm-up failed — first dictation will be slower")
-            }
-            isWarmingUp = false
-            prewarm()
+        let started = ContinuousClock.now
+        do {
+            _ = try await Self.respond(with: FoundationModelFormatter.makeSession(), to: "okay")
+            isWarm = true
+            Log.speech.info("cleanup model warm after \(started.duration(to: .now).seconds, format: .fixed(precision: 2))s")
+        } catch {
+            // Nothing to do about it: the next real cleanup gets the cold budget and tries
+            // again. Worth seeing in the log, not worth telling the user.
+            Log.speech.info("cleanup model warm-up failed — first dictation will be slower")
         }
+        isWarmingUp = false
+        prewarm()
     }
 
-    static func markWarm() { isWarm = true }
-
-    static func take() -> LanguageModelSession? {
+    private func take() -> LanguageModelSession? {
         defer { warmed = nil }
         return warmed
+    }
+
+    private static func respond(with session: LanguageModelSession, to text: String) async throws -> String {
+        let response = try await session.respond(
+            to: "Clean up this transcript:\n\n\(text)",
+            options: GenerationOptions(
+                // Near-deterministic: this is a formatting pass, not a creative one.
+                temperature: 0.1,
+                // Cleanup should never be much longer than the input; this bounds a runaway.
+                maximumResponseTokens: 1_200
+            )
+        )
+
+        return response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+/// Fire-and-forget entry points for callers on the main actor that must not wait.
+extension CleanupEngine {
+    nonisolated func prewarmInBackground() {
+        Task.detached(priority: .userInitiated) { await CleanupEngine.shared.prewarm() }
+    }
+
+    nonisolated func warmUpInBackground() {
+        Task.detached(priority: .utility) { await CleanupEngine.shared.warmUp() }
     }
 }
 

@@ -79,7 +79,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // five seconds of background work once, and the alternative is spending those
         // seconds while the user waits for their first sentence to land.
         if Settings.shared.cleanupEnabled && Settings.shared.smartCleanup {
-            ModelSessionPool.warmUp()
+            CleanupEngine.shared.warmUpInBackground()
         }
 
         // Write the dashboard up front so the menu item always opens something, even

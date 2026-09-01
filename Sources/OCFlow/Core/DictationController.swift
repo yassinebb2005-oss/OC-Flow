@@ -91,6 +91,7 @@ final class DictationController {
         hotkey.key = Settings.shared.pushToTalkKey
         hotkey.onPress = { [weak self] in self?.beginDictation() }
         hotkey.onRelease = { [weak self] in self?.endDictation() }
+        hotkey.onAbandon = { [weak self] in self?.abandonDictation() }
         return hotkey.start()
     }
 
@@ -132,7 +133,7 @@ final class DictationController {
         // Warm the cleanup model while the user is still talking — by key-release the
         // session is loaded and the LLM pass costs inference only, not model load.
         if Settings.shared.cleanupEnabled && Settings.shared.smartCleanup {
-            ModelSessionPool.prewarm()
+            CleanupEngine.shared.prewarmInBackground()
         }
         guard case .idle = state else { return }
         state = .starting
@@ -276,6 +277,16 @@ final class DictationController {
             state = .idle
             transcript = ""
         }
+    }
+
+    /// Drops a recording that turned out to be a keyboard shortcut rather than dictation.
+    ///
+    /// Deliberately not `endDictation()`: there is no transcript worth having from the
+    /// fraction of a second before the other key landed, and pasting one into whatever has
+    /// focus is the worst thing this app can do.
+    private func abandonDictation() {
+        if case .idle = state { return }
+        cancelDictation()
     }
 
     private func cancelDictation() {
