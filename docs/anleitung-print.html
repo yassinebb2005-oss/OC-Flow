@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>O.C. Flow installieren</title>
 <style>
-  @page { size: A4; margin: 17mm 17mm 13mm 17mm; }
+  @page { size: A4; margin: 14mm 16mm 10mm 16mm; }
   * { box-sizing: border-box; }
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body {
@@ -18,7 +18,7 @@
   .rule { height: 3pt; background: #1c1c1e; width: 46pt; margin: 0 0 12pt; }
   .req { background: #f4f4f6; border-left: 3pt solid #1c1c1e;
          padding: 6pt 10pt; margin: 0 0 9pt; font-size: 10pt; }
-  .step { margin: 0 0 13pt; page-break-inside: avoid; }
+  .step { margin: 0 0 11pt; page-break-inside: avoid; }
   .step h2 { font-size: 12.2pt; margin: 0 0 5pt; display: flex; align-items: baseline; gap: 8pt; }
   .num { display: inline-block; min-width: 17pt; height: 17pt; line-height: 17pt;
          text-align: center; background: #1c1c1e; color: #fff; border-radius: 50%;
@@ -33,11 +33,11 @@
         border: .5pt solid #d1d1d6; border-radius: 3pt; padding: 0 4pt; }
   .tip.nobreakpage { break-before: auto; }
   .tip { break-before: page; margin-bottom: 13pt; border: .8pt solid #d1d1d6; border-left: 3pt solid #1c1c1e; border-radius: 4pt;
-         padding: 8pt 11pt; margin: 0 0 9pt; page-break-inside: avoid; }
+         padding: 7pt 10pt; margin: 0 0 8pt; page-break-inside: avoid; }
   .tip h3 { font-size: 12pt; margin: 0 0 4pt; }
   .tip p { margin: 0 0 4pt; }
   .tip p:last-child { margin: 0; }
-  .done { margin-top: 0; border: .8pt solid #d1d1d6; border-radius: 5pt; padding: 10pt 12pt; margin-top: 6pt;
+  .done { margin: 5pt 0 0; padding-top: 6pt; border-top: 2pt solid #1c1c1e;
           page-break-inside: avoid; }
   .done h2 { font-size: 12.2pt; margin: 0 0 4pt; }
   .done p { margin: 0 0 5pt; }
@@ -48,7 +48,7 @@
   .menus { display: flex; gap: 13pt; align-items: flex-start; margin: 5pt 0 4pt; page-break-inside: avoid; }
   .menucol { flex: 1; }
   .menucol .cap { font-size: 8.8pt; color: #48484a; margin: 4pt 0 0; line-height: 1.4; }
-  .menucol.shot img { width: 84%; border-radius: 6pt; border: .5pt solid #d1d1d6; display: block; }
+  .menucol.shot img { width: 70%; border-radius: 6pt; border: .5pt solid #d1d1d6; display: block; }
   .menucol .cap2 { font-size: 9.2pt; color: #1c1c1e; margin: 0 0 6pt; }
   .menucol .cap2:last-child { color: #48484a; font-size: 8.8pt; margin: 0; }
   .menu { background: #2c2c2e; border-radius: 6pt; padding: 8pt 9pt; min-height: 46pt; color: #f2f2f7;
@@ -158,6 +158,10 @@ Terminal:</p>
   <p>Dann Systemeinstellungen mit <kbd>&#8984;Q</kbd> beenden, die App beenden (O.C. in der
   Menüleiste &#9656; „OC Flow beenden") und aus dem Ordner Programme neu öffnen. Die Abfrage
   kommt wieder, dort erlauben.</p>
+  <p><strong>Ein für alle Mal loswerden:</strong> einmal
+  <code>bash Tools/create-signing-cert.sh</code> im Ordner ausführen. Das legt ein eigenes
+  Signierzertifikat an, kostenlos, danach bleibt die Freigabe über alle Updates hinweg
+  bestehen.</p>
 </div>
 
 <div class="done">

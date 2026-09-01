@@ -78,6 +78,14 @@ tccutil reset Accessibility com.oc-hairsystems.ocflow
 
 Dann Systemeinstellungen komplett beenden mit ⌘Q, die App beenden (O.C. in der Menüleiste ▸ „OC Flow beenden") und aus dem Ordner Programme neu öffnen. Die Abfrage für die Bedienungshilfen kommt wieder, dort erlauben. Danach läuft es.
 
+**Das Freigeben ein für alle Mal loswerden:** einmal dieses Skript laufen lassen.
+
+```bash
+cd ~/OC-Flow && bash Tools/create-signing-cert.sh
+```
+
+Es erstellt ein eigenes Signierzertifikat auf deinem Mac, kostenlos. Danach bleibt die App für macOS bei jedem Update dieselbe, und die Freigabe hält. Beim nächsten `make install` fragt der Schlüsselbund einmal, ob codesign den Schlüssel benutzen darf, dort auf „Immer erlauben" klicken.
+
 ## Fertig
 
 Ab jetzt überall: Sprechtaste halten, sprechen, loslassen.

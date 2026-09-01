@@ -34,6 +34,14 @@ ifeq ($(strip $(SIGN_ID)),)
 SIGN_ID := $(shell security find-identity -v -p codesigning 2>/dev/null \
              | grep "Apple Development" | head -1 | sed -E 's/.*"(.*)".*/\1/')
 endif
+## Last stop before ad-hoc: a self-signed certificate made by Tools/create-signing-cert.sh.
+## Worthless for distribution, but stable across rebuilds, which is the only property that
+## keeps the Accessibility grant alive on a machine with no Apple certificate at all.
+ifeq ($(strip $(SIGN_ID)),)
+SIGN_ID := $(shell security find-identity -v -p codesigning 2>/dev/null \
+             | grep "OC Flow Dev" | head -1 | sed -E 's/.*"(.*)".*/\1/')
+endif
+## Ad-hoc, and every build then invalidates the grant. See Tools/create-signing-cert.sh.
 ifeq ($(strip $(SIGN_ID)),)
 SIGN_ID := -
 endif
