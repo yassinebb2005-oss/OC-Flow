@@ -112,6 +112,43 @@ struct CleanupGuardTests {
         #expect(verdict == .invented(["schicke"]))
     }
 
+    // MARK: - Hinzugefügte Auszeichnung
+
+    /// Der Fall aus dem Feld: „Das ist jetzt mit KI" kam als „Das ist jetzt mit **KI**"
+    /// zurück und landete mit Sternchen im Textfeld.
+    @Test func stripsBoldTheModelAdded() {
+        let plain = CleanupGuard.strippingAddedEmphasis(
+            from: "Das ist jetzt mit **KI**.",
+            original: "das ist jetzt mit ki"
+        )
+        #expect(plain == "Das ist jetzt mit KI.")
+    }
+
+    @Test func stripsSingleAsterisks() {
+        let plain = CleanupGuard.strippingAddedEmphasis(
+            from: "Der Termin ist *heute*.",
+            original: "der Termin ist heute"
+        )
+        #expect(plain == "Der Termin ist heute.")
+    }
+
+    /// Ein gesprochenes Sternchen bleibt stehen, sonst würde das Aufräumen Inhalt löschen.
+    @Test func keepsAsterisksTheSpeakerDictated() {
+        let text = "Der Preis steht in Zeile *2*."
+        #expect(CleanupGuard.strippingAddedEmphasis(from: text, original: "Preis in Zeile *2*") == text)
+    }
+
+    @Test func leavesTextWithoutAsterisksAlone() {
+        let text = "Der Termin ist am Mittwoch."
+        #expect(CleanupGuard.strippingAddedEmphasis(from: text, original: "termin am mittwoch") == text)
+    }
+
+    /// Unterstriche sind gewöhnliche Zeichen in Dateinamen, die fasst der Filter nicht an.
+    @Test func leavesUnderscoresAlone() {
+        let text = "Die Datei heißt kunden_liste_final."
+        #expect(CleanupGuard.strippingAddedEmphasis(from: text, original: "datei kunden_liste_final") == text)
+    }
+
     @Test func rejectsEmptyResponse() {
         #expect(CleanupGuard.check(original: "der Termin ist am Mittwoch", cleaned: "") == .unusable)
     }
