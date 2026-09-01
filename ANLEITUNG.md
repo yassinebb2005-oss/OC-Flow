@@ -38,7 +38,7 @@ Der letzte Befehl arbeitet ein paar Minuten. Am Ende startet O.C. Flow von selbs
 
 ## Schritt 4: Zwei Berechtigungen erteilen
 
-1. Es öffnet sich eine Abfrage für die **Bedienungshilfen** — falls nicht: Systemeinstellungen ▸ Datenschutz & Sicherheit ▸ Bedienungshilfen. Dort **OC Flow** einschalten.
+1. Es öffnet sich eine Abfrage für die **Bedienungshilfen** — falls nicht: Systemeinstellungen ▸ Datenschutz & Sicherheit ▸ Bedienungshilfen. Dort **OC Flow** einschalten. Steht der Schalter dort schon auf an, weil du O.C. Flow früher einmal installiert hattest, dann gilt er für die alte Fassung und wirkt nicht. In dem Fall den Eintrag mit dem Minus-Knopf entfernen und die App neu starten, dann kommt die Abfrage wieder.
 2. Die App **einmal beenden und neu starten**: auf das O.C. in der Menüleiste klicken ▸ „OC Flow beenden", dann im Ordner Programme wieder öffnen.
 3. Jetzt in irgendein Textfeld klicken, die **rechte ⌥-Taste** gedrückt halten und einen Satz sagen. Beim ersten Mal fragt macOS nach dem **Mikrofon** — erlauben, dann klappt es ab dem zweiten Versuch.
 
