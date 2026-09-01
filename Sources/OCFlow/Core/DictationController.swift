@@ -154,7 +154,11 @@ final class DictationController {
                 let engine = makeEngine()
                 self.engine = engine
 
-                let chunks = try await engine.start()
+                // Bounded like the wrap-up, and for the same reason: this is a call into
+                // Apple's recognizer, and a start that never returns leaves the app in
+                // `.starting` with a timer running and no key able to stop it. Failing here
+                // lands in the `catch` below, which resets the state and says why.
+                let chunks = try await Self.withDeadline(Self.startBudget) { try await engine.start() }
 
                 // Compare mode captures in *Apple's* format, not a format of our choosing.
                 //
@@ -246,21 +250,20 @@ final class DictationController {
         releasedAt = Date()
 
         Task { @MainActor in
-            // Drain every captured buffer into the engine before asking it to finalize,
-            // or the tail of the utterance gets dropped.
+            // Drain every captured buffer into the engine before asking it to finalize, or
+            // the tail of the utterance gets dropped — but under a deadline, and the deadline
+            // covers the draining too. Feeding a stalled recognizer never returns either, so
+            // a budget that starts after the drain is a budget that is never reached.
             audioContinuation?.finish()
             audioContinuation = nil
-            recorded = await feedTask?.value ?? []
-            feedTask = nil
 
-            // Bounded, because `finish()` is not guaranteed to return. Apple's recognizer
-            // stays silent on audio it can make nothing of, and an unbounded await there is
-            // a recording that never ends.
-            guard await finalizeEngine(within: Self.finalizeBudget) else {
+            guard let drained = await wrapUp(within: Self.finalizeBudget) else {
                 Log.speech.info("recognizer did not finalize in time — dropping the recording")
                 cancelDictation()
                 return
             }
+            recorded = drained
+            feedTask = nil
             consumeTask = nil
             engine = nil
 
@@ -271,6 +274,9 @@ final class DictationController {
 
             let raw = transcript
             guard !raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                // Logged, because a silent exit here is indistinguishable from a hang in the
+                // log — and that cost an hour of looking in the wrong place.
+                Log.speech.info("nothing recognized — nothing to insert")
                 state = .idle
                 transcript = ""
                 return
@@ -307,32 +313,69 @@ final class DictationController {
         cancelDictation()
     }
 
+    /// How long the recognizer may take to come up before the attempt is abandoned.
+    private static let startBudget: Duration = .seconds(8)
+
+    /// Runs `work` under a deadline. Throws `TranscriptionError.startTimedOut` on expiry.
+    ///
+    /// The work keeps running after a timeout — it is a `Task`, not a child — because the
+    /// point is to stop *waiting*, and a half-started recognizer is torn down by the caller's
+    /// error path anyway.
+    private static func withDeadline<T: Sendable>(
+        _ budget: Duration,
+        _ work: @escaping @Sendable () async throws -> T
+    ) async throws -> T {
+        let job = Task { try await work() }
+        let deadline = Task { try? await Task.sleep(for: budget) }
+
+        return try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask { try await job.value }
+            group.addTask {
+                await deadline.value
+                throw TranscriptionError.startTimedOut
+            }
+            guard let first = try await group.next() else { throw TranscriptionError.startTimedOut }
+            group.cancelAll()
+            deadline.cancel()
+            return first
+        }
+    }
+
     /// Shortest hold taken seriously as speech.
     private static let minimumHold: TimeInterval = 0.25
 
     /// How long the recognizer may take to produce its final result after the audio ends.
     private static let finalizeBudget: Duration = .seconds(6)
 
-    /// - Returns: `false` if the recognizer did not finalize within `budget`.
-    private func finalizeEngine(within budget: Duration) async -> Bool {
+    /// Drains the captured audio into the recognizer and asks it for its final result.
+    ///
+    /// - Returns: the captured chunks, or `nil` if the whole wrap-up did not finish within
+    ///   `budget`. Both steps are inside the budget on purpose: `feed` and `finish` are both
+    ///   calls into Apple's recognizer, and both have been seen not to return on audio it can
+    ///   make nothing of. A 47ms tap after a long pause was enough.
+    private func wrapUp(within budget: Duration) async -> [AudioChunk]? {
         let work = Task { @MainActor in
+            let drained = await self.feedTask?.value ?? []
             await self.engine?.finish()
             await self.consumeTask?.value
+            return drained
         }
         let deadline = Task {
             try? await Task.sleep(for: budget)
         }
 
-        // Whichever lands first decides. The loser is cancelled: unlike the cleanup model,
-        // a recognizer that has already gone quiet has nothing left to contribute.
-        return await withTaskGroup(of: Bool.self) { group in
-            group.addTask { await work.value; return true }
-            group.addTask { await deadline.value; return false }
-            let finished = await group.next() ?? false
+        // Whichever lands first decides. On expiry everything is cancelled, `feedTask`
+        // explicitly: it is detached, so cancelling the waiter above would leave it feeding a
+        // recognizer nobody is listening to any more.
+        return await withTaskGroup(of: [AudioChunk]?.self) { group in
+            group.addTask { await work.value }
+            group.addTask { await deadline.value; return nil }
+            let result = await group.next() ?? nil
             group.cancelAll()
             work.cancel()
             deadline.cancel()
-            return finished
+            if result == nil { self.feedTask?.cancel() }
+            return result
         }
     }
 
@@ -372,10 +415,9 @@ final class DictationController {
         capture.stop()
         audioContinuation?.finish()
         audioContinuation = nil
-        _ = await feedTask?.value
-        feedTask = nil
 
-        _ = await finalizeEngine(within: Self.finalizeBudget)
+        _ = await wrapUp(within: Self.finalizeBudget)
+        feedTask = nil
         engine = nil
         consumeTask?.cancel()
         consumeTask = nil
@@ -397,6 +439,7 @@ final class DictationController {
         recorded.removeAll(keepingCapacity: false)
 
         guard !chunks.isEmpty, let holdStarted, let releasedAt else {
+            Log.speech.info("compare · nothing captured — nothing to compare")
             state = .idle
             transcript = ""
             return
