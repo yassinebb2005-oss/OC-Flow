@@ -164,28 +164,21 @@ und schau auf die Zeile <strong>Automatisch aufräumen</strong>:</p>
 </div>
 
 <h2 class="sec neuseite">Neue Version holen</h2>
-<p>Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese
-zwei Befehle im Terminal. Erst in den Ordner wechseln:</p>
-<pre>cd ~/OC-Flow || cd ~/Desktop/OC-Flow</pre>
-<p>Dann aktualisieren:</p>
-<pre>git pull &amp;&amp; make install</pre>
-<p>Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts,
-dafür sorgt das Zertifikat aus Schritt 3.</p>
-<p>Sagt der erste Befehl „no such file or directory", liegt der Ordner woanders. Dann suchst
-du ihn so, und wechselst mit <code>cd</code> in den angezeigten Pfad:</p>
-<pre>find ~ -maxdepth 3 -type d -name OC-Flow 2>/dev/null</pre>
-<p>Kommt dabei nichts, gibt es ihn auf diesem Mac nicht mehr. Kein Problem: einfach Schritt 3
-von oben nochmal machen, das ersetzt das Update.</p>
+<p>Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese vier
+Befehle nacheinander, einzeln kopieren:</p>
+<pre>rm -rf ~/OC-Flow</pre>
+<pre>cd ~ &amp;&amp; git clone https://github.com/yassinebb2005-oss/OC-Flow.git</pre>
+<pre>cd ~/OC-Flow &amp;&amp; bash Tools/create-signing-cert.sh</pre>
+<pre>make install</pre>
+<p>Das ist absichtlich dasselbe wie bei der Installation. Der erste Befehl wirft den alten
+Ordner weg, danach kommt alles frisch von GitHub. Deshalb funktioniert es immer, auch wenn du
+den Ordner damals woanders angelegt oder inzwischen gelöscht hast.</p>
 
 <div class="tip nobreakpage">
-  <h3>Installiert, als es den Zertifikat-Schritt noch nicht gab?</h3>
-  <p>Dann reagiert die Sprechtaste nach dem Update nicht mehr, weil macOS die App als eine
-  neue ansieht. Einmal nachholen, danach ist Ruhe:</p>
-  <pre>bash Tools/create-signing-cert.sh &amp;&amp; make install</pre>
-  <p>Anschließend die Berechtigung ein letztes Mal erteilen: Systemeinstellungen &#9656;
-  Datenschutz &amp; Sicherheit &#9656; Bedienungshilfen. Steht <strong>OC Flow</strong> dort
-  noch in der Liste, mit dem Minus-Knopf entfernen, App beenden und aus dem Ordner Programme
-  neu öffnen. Die Abfrage kommt wieder, dort erlauben.</p>
+  <h3>Deine Sachen bleiben</h3>
+  <p>Im Ordner liegt nur der Quellcode. Aufnahmen, Wörterbuch und Einstellungen liegen an
+  anderer Stelle und werden nicht angefasst. Neu erlauben musst du auch nichts, dafür sorgt
+  das Zertifikat. Ein bis zwei Minuten, dann läuft die neue Fassung.</p>
 </div>
 
 <h2 class="sec">Wenn etwas hakt</h2>

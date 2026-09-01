@@ -72,35 +72,29 @@ Deshalb der Test, der zählt: diktiere einen Satz und schau auf die Uhr. Ist der
 
 ## Neue Version holen
 
-Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese zwei Befehle im Terminal. Erst in den Ordner wechseln:
+Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese vier Befehle nacheinander, einzeln kopieren:
 
 ```bash
-cd ~/OC-Flow || cd ~/Desktop/OC-Flow
+rm -rf ~/OC-Flow
 ```
-
-Dann aktualisieren:
 
 ```bash
-git pull && make install
+cd ~ && git clone https://github.com/yassinebb2005-oss/OC-Flow.git
 ```
-
-Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts, dafür sorgt das Zertifikat aus Schritt 3.
-
-Sagt der erste Befehl „no such file or directory", liegt der Ordner woanders. Dann suchst du ihn so:
 
 ```bash
-find ~ -maxdepth 3 -type d -name OC-Flow 2>/dev/null
+cd ~/OC-Flow && bash Tools/create-signing-cert.sh
 ```
-
-Kommt dabei nichts, gibt es ihn auf diesem Mac nicht mehr. Kein Problem: einfach Schritt 3 von oben nochmal machen, das ersetzt das Update.
-
-**Falls du die App installiert hast, als es den Zertifikat-Schritt noch nicht gab:** dann reagiert die Sprechtaste nach dem Update nicht mehr, weil macOS die App als eine neue ansieht. Einmal nachholen, danach ist Ruhe:
 
 ```bash
-bash Tools/create-signing-cert.sh && make install
+make install
 ```
 
-Anschließend die Berechtigung ein letztes Mal erteilen: Systemeinstellungen ▸ Datenschutz & Sicherheit ▸ Bedienungshilfen. Steht **OC Flow** dort noch in der Liste, mit dem Minus-Knopf entfernen, dann die App beenden und aus dem Ordner Programme neu öffnen. Die Abfrage kommt wieder, dort erlauben.
+Das ist absichtlich dasselbe wie bei der Installation. Der erste Befehl wirft den alten Ordner weg, danach kommt alles frisch von GitHub. Deshalb funktioniert es immer, auch wenn du den Ordner damals woanders angelegt oder inzwischen gelöscht hast.
+
+**Deine Sachen bleiben.** Im Ordner liegt nur der Quellcode. Deine Aufnahmen, dein Wörterbuch und deine Einstellungen liegen an anderer Stelle und werden nicht angefasst. Neu erlauben musst du auch nichts, dafür sorgt das Zertifikat.
+
+Ein bis zwei Minuten, dann läuft die neue Fassung.
 
 ## Wenn etwas hakt
 
