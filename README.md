@@ -63,6 +63,14 @@ tccutil reset Accessibility com.oc-hairsystems.ocflow
 
 Danach die Systemeinstellungen komplett beenden (⌘Q), neu öffnen und die Berechtigung neu erteilen. Wichtig: immer mit der Bundle-ID zurücksetzen, ein nacktes `tccutil reset Accessibility` löscht die Einträge sämtlicher Apps.
 
+Wer das nach jedem Update erlebt, signiert ad hoc: ohne Zertifikat im Schlüsselbund ändert sich die Signatur bei jedem Bauen, und TCC hängt die Freigabe an die Signatur. Einmalig behoben mit
+
+```bash
+bash Tools/create-signing-cert.sh
+```
+
+Das Skript legt ein selbst ausgestelltes Code-Signing-Zertifikat an, das Makefile nimmt es danach von allein. Nicht zur Weitergabe geeignet, aber stabil über Rebuilds, und genau das ist die Eigenschaft, auf die es hier ankommt.
+
 **„Apple Intelligence ist ausgeschaltet" im Menü.** Systemeinstellungen ▸ Apple Intelligence & Siri einschalten, kurz warten, bis das Modell geladen ist.
 
 **Der Text landet in der falschen App.** Der Text geht immer an das Fenster mit dem Fokus. Erst ins Zielfeld klicken, dann diktieren.
