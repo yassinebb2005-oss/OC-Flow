@@ -72,26 +72,54 @@ Deshalb der Test, der zählt: diktiere einen Satz und schau auf die Uhr. Ist der
 
 ## Neue Version holen
 
-Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese Zeile im Terminal einfügen:
+Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese zwei Befehle im Terminal. Erst in den Ordner wechseln:
 
 ```bash
-cd "$(find ~ -maxdepth 3 -type d -name OC-Flow -print -quit 2>/dev/null)" && git pull && make install
+cd ~/OC-Flow || cd ~/Desktop/OC-Flow
 ```
 
-Die Zeile sucht den Ordner selbst, egal wo du ihn beim Installieren abgelegt hast. Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts, dafür sorgt das Zertifikat aus Schritt 3.
+Dann aktualisieren:
 
-Kommt eine Fehlermeldung wie „no such file or directory", dann gibt es den Ordner auf diesem Mac nicht mehr. Kein Problem: einfach Schritt 3 von oben nochmal machen, das ersetzt das Update.
+```bash
+git pull && make install
+```
+
+Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts, dafür sorgt das Zertifikat aus Schritt 3.
+
+Sagt der erste Befehl „no such file or directory", liegt der Ordner woanders. Dann suchst du ihn so:
+
+```bash
+find ~ -maxdepth 3 -type d -name OC-Flow 2>/dev/null
+```
+
+Kommt dabei nichts, gibt es ihn auf diesem Mac nicht mehr. Kein Problem: einfach Schritt 3 von oben nochmal machen, das ersetzt das Update.
 
 **Falls du die App installiert hast, als es den Zertifikat-Schritt noch nicht gab:** dann reagiert die Sprechtaste nach dem Update nicht mehr, weil macOS die App als eine neue ansieht. Einmal nachholen, danach ist Ruhe:
 
 ```bash
-cd "$(find ~ -maxdepth 3 -type d -name OC-Flow -print -quit 2>/dev/null)" && bash Tools/create-signing-cert.sh && make install
+bash Tools/create-signing-cert.sh && make install
 ```
 
 Anschließend die Berechtigung ein letztes Mal erteilen: Systemeinstellungen ▸ Datenschutz & Sicherheit ▸ Bedienungshilfen. Steht **OC Flow** dort noch in der Liste, mit dem Minus-Knopf entfernen, dann die App beenden und aus dem Ordner Programme neu öffnen. Die Abfrage kommt wieder, dort erlauben.
+
+## Wenn etwas hakt
+
+**Die Sprechtaste tut nichts.** Systemeinstellungen ▸ Datenschutz & Sicherheit ▸ Bedienungshilfen öffnen. Steht **OC Flow** dort auf an, obwohl nichts passiert, den Eintrag mit dem Minus-Knopf entfernen, die App beenden (O.C. in der Menüleiste ▸ „OC Flow beenden") und aus dem Ordner Programme neu öffnen. Die Abfrage kommt wieder, dort erlauben.
+
+**Der Zähler im Fenster läuft und hört nicht auf.** App über das O.C. in der Menüleiste beenden und neu öffnen. Es geht nichts verloren, aufgenommen wurde in dem Zustand nichts.
+
+**Der Text landet im falschen Fenster.** Er geht immer dorthin, wo der Cursor blinkt. Also erst ins Zielfeld klicken, dann die Sprechtaste halten.
+
+**Der Text kommt, aber langsam.** Siehe den Kasten oben, dann **Automatisch aufräumen** abhaken.
+
+**Sonst?** Frag Yassine, und schick ihm gleich die Ausgabe von diesem Befehl mit, darin steht, was die App gemacht hat:
+
+```bash
+log show --info --last 10m | grep ocflow
+```
 
 ## Fertig
 
 Ab jetzt überall: Sprechtaste halten, sprechen, loslassen.
 
-**Hakt etwas?** In der [README](README.md) steht unter „Wenn etwas hakt", was zu tun ist — oder frag Yassine.
+**Hakt etwas?** Siehe den Abschnitt oben. Oder frag Yassine.

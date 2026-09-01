@@ -34,23 +34,23 @@
   .tip.nobreakpage { break-before: auto; }
   .tip { break-before: page; margin-bottom: 13pt; border: .8pt solid #d1d1d6; border-left: 3pt solid #1c1c1e; border-radius: 4pt;
          padding: 7pt 10pt; margin: 0 0 8pt; page-break-inside: avoid; }
-  .tip h3 { font-size: 12pt; margin: 0 0 4pt; }
-  .tip p { margin: 0 0 4pt; }
+  .tip h3 { font-size: 11.4pt; margin: 0 0 3pt; }
+  .tip p { margin: 0 0 3pt; }
   .tip p:last-child { margin: 0; }
-  .done { margin: 5pt 0 0; padding-top: 6pt; border-top: 2pt solid #1c1c1e;
+  .done { margin: 4pt 0 0; padding-top: 5pt; border-top: 2pt solid #1c1c1e;
           page-break-inside: avoid; }
   .done h2 { font-size: 12.2pt; margin: 0 0 4pt; }
   .done p { margin: 0 0 5pt; }
   .done p:last-child { margin-bottom: 0; }
-  footer { margin-top: 6pt; font-size: 8.5pt; color: #8a8a8e; border-top: .5pt solid #e5e5ea;
+  footer { margin-top: 4pt; font-size: 8.5pt; color: #8a8a8e; border-top: .5pt solid #e5e5ea;
            padding-top: 6pt; }
-  h2.sec { font-size: 12.2pt; margin: 0 0 4pt; }
+  h2.sec { font-size: 11.8pt; margin: 0 0 3pt; }
   h2.sec.neuseite { break-before: page; margin-top: 0; }
-  .menus { display: flex; gap: 13pt; align-items: flex-start; margin: 5pt 0 4pt; page-break-inside: avoid; }
+  .menus { display: flex; gap: 13pt; align-items: flex-start; margin: 4pt 0 3pt; page-break-inside: avoid; }
   .menucol { flex: 1; }
   .menucol .cap { font-size: 8.8pt; color: #48484a; margin: 4pt 0 0; line-height: 1.4; }
   .menucol.shot img { width: 100%; border-radius: 6pt; border: .5pt solid #d1d1d6; display: block; }
-  .menucol .cap2 { font-size: 9.2pt; color: #1c1c1e; margin: 0 0 6pt; }
+  .menucol .cap2 { font-size: 9.2pt; color: #1c1c1e; margin: 0 0 5pt; }
   .menucol .cap2:last-child { color: #48484a; font-size: 8.8pt; margin: 0; }
   .menu { background: #2c2c2e; border-radius: 6pt; padding: 8pt 9pt; min-height: 46pt; color: #f2f2f7;
           font-size: 8.6pt; line-height: 1.35; }
@@ -165,31 +165,55 @@ und schau auf die Zeile <strong>Automatisch aufräumen</strong>:</p>
 
 <h2 class="sec neuseite">Neue Version holen</h2>
 <p>Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese
-Zeile im Terminal einfügen:</p>
-<pre>cd "$(find ~ -maxdepth 3 -type d -name OC-Flow -print -quit 2>/dev/null)" &amp;&amp; git pull &amp;&amp; make install</pre>
-<p>Die Zeile sucht den Ordner selbst, egal wo du ihn beim Installieren abgelegt hast. Ein bis
-zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts, dafür sorgt
-das Zertifikat aus Schritt 3.</p>
-<p>Kommt eine Fehlermeldung wie „no such file or directory", dann gibt es den Ordner auf
-diesem Mac nicht mehr. Kein Problem: einfach Schritt 3 von oben nochmal machen, das ersetzt
-das Update.</p>
+zwei Befehle im Terminal. Erst in den Ordner wechseln:</p>
+<pre>cd ~/OC-Flow || cd ~/Desktop/OC-Flow</pre>
+<p>Dann aktualisieren:</p>
+<pre>git pull &amp;&amp; make install</pre>
+<p>Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts,
+dafür sorgt das Zertifikat aus Schritt 3.</p>
+<p>Sagt der erste Befehl „no such file or directory", liegt der Ordner woanders. Dann suchst
+du ihn so, und wechselst mit <code>cd</code> in den angezeigten Pfad:</p>
+<pre>find ~ -maxdepth 3 -type d -name OC-Flow 2>/dev/null</pre>
+<p>Kommt dabei nichts, gibt es ihn auf diesem Mac nicht mehr. Kein Problem: einfach Schritt 3
+von oben nochmal machen, das ersetzt das Update.</p>
 
 <div class="tip nobreakpage">
   <h3>Installiert, als es den Zertifikat-Schritt noch nicht gab?</h3>
   <p>Dann reagiert die Sprechtaste nach dem Update nicht mehr, weil macOS die App als eine
   neue ansieht. Einmal nachholen, danach ist Ruhe:</p>
-  <pre>cd "$(find ~ -maxdepth 3 -type d -name OC-Flow -print -quit 2>/dev/null)" \
-  &amp;&amp; bash Tools/create-signing-cert.sh &amp;&amp; make install</pre>
+  <pre>bash Tools/create-signing-cert.sh &amp;&amp; make install</pre>
   <p>Anschließend die Berechtigung ein letztes Mal erteilen: Systemeinstellungen &#9656;
   Datenschutz &amp; Sicherheit &#9656; Bedienungshilfen. Steht <strong>OC Flow</strong> dort
   noch in der Liste, mit dem Minus-Knopf entfernen, App beenden und aus dem Ordner Programme
   neu öffnen. Die Abfrage kommt wieder, dort erlauben.</p>
 </div>
 
+<h2 class="sec">Wenn etwas hakt</h2>
+<div class="menus">
+  <div class="menucol">
+    <p class="cap2"><strong>Die Sprechtaste tut nichts.</strong> Systemeinstellungen &#9656;
+    Datenschutz &amp; Sicherheit &#9656; Bedienungshilfen. Steht <strong>OC Flow</strong> dort
+    auf an und passiert trotzdem nichts, Eintrag mit dem Minus-Knopf entfernen, App beenden und
+    neu öffnen, Abfrage erlauben.</p>
+    <p class="cap2"><strong>Der Zähler läuft und hört nicht auf.</strong> App über das O.C. in
+    der Menüleiste beenden und neu öffnen. Es geht nichts verloren.</p>
+  </div>
+  <div class="menucol">
+    <p class="cap2"><strong>Der Text landet im falschen Fenster.</strong> Er geht immer dorthin,
+    wo der Cursor blinkt. Also erst ins Zielfeld klicken, dann die Sprechtaste halten.</p>
+    <p class="cap2"><strong>Der Text kommt, aber langsam.</strong> Siehe den Kasten oben, dann
+    <strong>Automatisch aufräumen</strong> abhaken.</p>
+  </div>
+</div>
+
+<p class="cap2"><strong>Sonst?</strong> Frag Yassine, und schick ihm gleich die Ausgabe von
+diesem Befehl mit, darin steht, was die App gemacht hat:</p>
+<pre>log show --info --last 10m | grep ocflow</pre>
+
 <div class="done">
   <h2>Fertig</h2>
   <p>Ab jetzt überall: Sprechtaste halten, sprechen, loslassen.</p>
-  <p><strong>Hakt etwas?</strong> Die README hat einen Abschnitt „Wenn etwas hakt". Oder frag Yassine.</p>
+  <p><strong>Hakt etwas?</strong> Siehe oben. Oder frag Yassine.</p>
 </div>
 
 <footer>O.C. Flow &#183; Installationsanleitung &#183; github.com/yassinebb2005-oss/OC-Flow</footer>
