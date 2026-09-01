@@ -178,28 +178,53 @@ actor CleanupEngine {
     private var warmed: LanguageModelSession?
     private var isWarmingUp = false
 
-    /// Whether a generation has run to completion in this process.
+    /// When the model last finished a generation, or nil if it never has in this process.
     ///
-    /// `session.prewarm()` returns in about 10ms and does not load the weights; the load
-    /// happens inside the first `respond`. So "has the model ever answered" is the only
-    /// honest test for warm, and it's what picks the timeout budget.
-    private(set) var isWarm = false
+    /// A timestamp rather than a flag, because "warm" expires. The system evicts the model
+    /// after a while idle, and a stale flag then sent a reload into the short budget — which
+    /// is exactly what happened in the field: warm at launch, timed out three minutes later.
+    private var lastGeneration: ContinuousClock.Instant?
+
+    var isWarm: Bool {
+        guard let lastGeneration else { return false }
+        return lastGeneration.duration(to: .now) < Self.staysWarm
+    }
+
+    /// How long a finished generation is taken as proof the model is still resident.
+    ///
+    /// Not knowable from the framework, so it's a guess with a cheap failure mode: too short
+    /// costs a few seconds of extra patience, too long costs one fallback to the rule-based
+    /// cleanup.
+    private static let staysWarm: Duration = .seconds(90)
 
     /// How long a cleanup may take before the raw text beats making the user wait.
     ///
-    /// Two budgets, because the first generation in a process pays for loading the model and
-    /// the rest don't. Measured with Apple Intelligence on: 5.5s cold and 0.64s warm on a
-    /// desk machine, 12.8s cold on a MacBook Air. A flat 4s therefore missed *every* cleanup
-    /// — and worse, the timeout tore down the load in flight, so the next utterance started
-    /// cold again and the model never once finished loading.
-    var timeout: Duration { isWarm ? .seconds(4) : .seconds(20) }
+    /// Two budgets, because the work splits in two. Measured on a MacBook Air with Apple
+    /// Intelligence on: cleaning a sentence takes 0.6 to 0.9s once the model is resident,
+    /// and loading it takes 7 to 13s. Neither the length of the instructions nor reusing a
+    /// session changes that materially — it is all load time.
+    ///
+    /// So the short budget covers inference and the long one covers a reload. A flat 4s
+    /// missed every cleanup that followed an idle period, and a flat 20s would have made the
+    /// user wait 20s for a sentence.
+    var timeout: Duration { isWarm ? .seconds(4) : .seconds(12) }
 
     /// Cleans one transcript. The caller races this against `timeout`.
     func clean(_ text: String) async throws -> String {
         let session = take() ?? FoundationModelFormatter.makeSession()
         let cleaned = try await Self.respond(with: session, to: text)
-        isWarm = true
+        lastGeneration = .now
         return cleaned
+    }
+
+    /// Everything worth doing between the key going down and the user stopping.
+    ///
+    /// Speech is dead time for the model, usually a few seconds of it, and a reload costs 7
+    /// to 13s. Spending the talking time on the reload is the difference between a sentence
+    /// that lands cleaned and one that falls back to the rules.
+    func prepare() async {
+        prewarm()
+        await warmUp()
     }
 
     /// Builds a session so its setup is done before the user stops talking.
@@ -220,7 +245,7 @@ actor CleanupEngine {
         let started = ContinuousClock.now
         do {
             _ = try await Self.respond(with: FoundationModelFormatter.makeSession(), to: "okay")
-            isWarm = true
+            lastGeneration = .now
             Log.speech.info("cleanup model warm after \(started.duration(to: .now).seconds, format: .fixed(precision: 2))s")
         } catch {
             // Nothing to do about it: the next real cleanup gets the cold budget and tries
@@ -253,8 +278,8 @@ actor CleanupEngine {
 
 /// Fire-and-forget entry points for callers on the main actor that must not wait.
 extension CleanupEngine {
-    nonisolated func prewarmInBackground() {
-        Task.detached(priority: .userInitiated) { await CleanupEngine.shared.prewarm() }
+    nonisolated func prepareInBackground() {
+        Task.detached(priority: .userInitiated) { await CleanupEngine.shared.prepare() }
     }
 
     nonisolated func warmUpInBackground() {

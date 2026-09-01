@@ -130,10 +130,11 @@ final class DictationController {
     // MARK: - Dictation
 
     private func beginDictation() {
-        // Warm the cleanup model while the user is still talking — by key-release the
-        // session is loaded and the LLM pass costs inference only, not model load.
+        // Warm the cleanup model while the user is still talking. The model gets evicted
+        // after a while idle, and reloading it costs 7 to 13s on a laptop, so the talking
+        // time is the only place that cost can hide.
         if Settings.shared.cleanupEnabled && Settings.shared.smartCleanup {
-            CleanupEngine.shared.prewarmInBackground()
+            CleanupEngine.shared.prepareInBackground()
         }
         guard case .idle = state else { return }
         state = .starting
