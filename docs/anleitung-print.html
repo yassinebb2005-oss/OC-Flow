@@ -26,7 +26,7 @@
   .step p { margin: 0 0 6pt; }
   code, pre { font-family: "SF Mono", Menlo, Consolas, monospace; }
   pre { background: #1c1c1e; color: #f2f2f7; padding: 7pt 11pt; border-radius: 4pt;
-        font-size: 9.5pt; margin: 5pt 0; overflow-wrap: anywhere; }
+        font-size: 9.5pt; margin: 5pt 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   ol.sub { margin: 6pt 0 0; padding-left: 16pt; }
   ol.sub li { margin-bottom: 3pt; }
   kbd { font-family: inherit; font-weight: 600; background: #f4f4f6;
@@ -164,17 +164,22 @@ und schau auf die Zeile <strong>Automatisch aufräumen</strong>:</p>
 </div>
 
 <h2 class="sec neuseite">Neue Version holen</h2>
-<p>Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, im
-Terminal:</p>
-<pre>cd ~/OC-Flow &amp;&amp; git pull &amp;&amp; make install</pre>
-<p>Ein bis zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts,
-dafür sorgt das Zertifikat aus Schritt 3.</p>
+<p>Es gibt keine automatische Aktualisierung. Wenn Yassine sagt, es gibt was Neues, diese
+Zeile im Terminal einfügen:</p>
+<pre>cd "$(find ~ -maxdepth 3 -type d -name OC-Flow -print -quit 2>/dev/null)" &amp;&amp; git pull &amp;&amp; make install</pre>
+<p>Die Zeile sucht den Ordner selbst, egal wo du ihn beim Installieren abgelegt hast. Ein bis
+zwei Minuten, danach läuft alles weiter wie vorher. Neu erlauben musst du nichts, dafür sorgt
+das Zertifikat aus Schritt 3.</p>
+<p>Kommt eine Fehlermeldung wie „no such file or directory", dann gibt es den Ordner auf
+diesem Mac nicht mehr. Kein Problem: einfach Schritt 3 von oben nochmal machen, das ersetzt
+das Update.</p>
 
 <div class="tip nobreakpage">
   <h3>Installiert, als es den Zertifikat-Schritt noch nicht gab?</h3>
   <p>Dann reagiert die Sprechtaste nach dem Update nicht mehr, weil macOS die App als eine
   neue ansieht. Einmal nachholen, danach ist Ruhe:</p>
-  <pre>cd ~/OC-Flow &amp;&amp; bash Tools/create-signing-cert.sh &amp;&amp; make install</pre>
+  <pre>cd "$(find ~ -maxdepth 3 -type d -name OC-Flow -print -quit 2>/dev/null)" \
+  &amp;&amp; bash Tools/create-signing-cert.sh &amp;&amp; make install</pre>
   <p>Anschließend die Berechtigung ein letztes Mal erteilen: Systemeinstellungen &#9656;
   Datenschutz &amp; Sicherheit &#9656; Bedienungshilfen. Steht <strong>OC Flow</strong> dort
   noch in der Liste, mit dem Minus-Knopf entfernen, App beenden und aus dem Ordner Programme
