@@ -191,7 +191,7 @@ private struct MenuContent: View {
 
         Divider()
 
-        Picker("Push-to-talk key", selection: Binding(
+        Picker("Sprechtaste", selection: Binding(
             get: { settings.pushToTalkKey },
             set: { key in
                 settings.pushToTalkKey = key

@@ -8,8 +8,8 @@ enum SpeechEngineChoice: String, CaseIterable, Sendable {
 
     var displayName: String {
         switch self {
-        case .apple: "Apple (streaming)"
-        case .parakeet: "Parakeet (batch)"
+        case .apple: "Apple (schreibt beim Sprechen mit)"
+        case .parakeet: "Parakeet (erkennt beim Loslassen)"
         }
     }
 

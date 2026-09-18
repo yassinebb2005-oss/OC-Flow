@@ -50,7 +50,7 @@ Der letzte Befehl arbeitet ein paar Minuten. Fragt der Schlüsselbund dabei, ob 
 
 ## Sprechtaste umstellen
 
-Voreingestellt ist die rechte ⌥-Taste. Viele nehmen lieber **fn**. Umstellen: im O.C.-Flow-Fenster oben rechts auf das **Zahnrad**, dann unter **Sprechtaste** auf „fn" klicken. Es greift sofort, kein Neustart nötig. Der gleiche Schalter sitzt auch im Menüleisten-Menü unter „Push-to-talk key".
+Voreingestellt ist die rechte ⌥-Taste. Viele nehmen lieber **fn**. Umstellen: im O.C.-Flow-Fenster oben rechts auf das **Zahnrad**, dann unter **Sprechtaste** auf „fn" klicken. Es greift sofort, kein Neustart nötig. Der gleiche Schalter sitzt auch im Menüleisten-Menü unter „Sprechtaste".
 
 fn bleibt dabei normal benutzbar, also fn + Pfeiltasten, fn + Entf und der Emoji-Picker.
 
@@ -109,7 +109,7 @@ Ein bis zwei Minuten, dann läuft die neue Fassung.
 **Sonst?** Frag Yassine, und schick ihm gleich die Ausgabe von diesem Befehl mit, darin steht, was die App gemacht hat:
 
 ```bash
-log show --info --last 10m | grep ocflow
+/usr/bin/log show --info --last 10m | grep ocflow
 ```
 
 ## Fertig
