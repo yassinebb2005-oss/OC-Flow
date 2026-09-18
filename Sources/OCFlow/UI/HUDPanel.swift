@@ -17,7 +17,9 @@ final class HUDPanel: NSPanel {
         )
 
         isFloatingPanel = true
-        level = .statusBar
+        // Above `.statusBar`: a full-screen window's own overlays sit at status-bar level,
+        // and the HUD losing that tie is the difference between seeing it and not.
+        level = .screenSaver
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         hidesOnDeactivate = false
         isMovableByWindowBackground = false
@@ -62,6 +64,7 @@ final class HUDPanel: NSPanel {
         reposition()
         alphaValue = 0
         orderFrontRegardless()
+        Log.app.info("HUD shown at \(NSStringFromRect(self.frame), privacy: .public)")
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.16
             animator().alphaValue = 1

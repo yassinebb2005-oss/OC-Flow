@@ -34,6 +34,9 @@ public struct DictionaryCorrector: Sendable {
     private struct Rule: Sendable {
         let regex: NSRegularExpression
         let replacement: String
+        /// The literal text the rule writes, unescaped — used to tell a real fix from a
+        /// match that already reads exactly as the rule would write it.
+        let write: String
         let trigger: String
     }
 
@@ -51,6 +54,7 @@ public struct DictionaryCorrector: Sendable {
             return Rule(
                 regex: regex,
                 replacement: NSRegularExpression.escapedTemplate(for: entry.write),
+                write: entry.write,
                 trigger: entry.hear
             )
         }
@@ -74,16 +78,16 @@ public struct DictionaryCorrector: Sendable {
 
         for rule in rules {
             let range = NSRange(result.startIndex..., in: result)
-            let matches = rule.regex.numberOfMatches(in: result, range: range)
-            guard matches > 0 else { continue }
+            let matches = rule.regex.matches(in: result, range: range)
+            guard !matches.isEmpty else { continue }
 
-            // Record what the engine actually produced, not the rule's trigger — seeing the
-            // real mishearing is the point, and it can differ from the trigger in case or
-            // spacing ("CloudCode" matched by "cloud code").
-            let firstMatch = rule.regex.firstMatch(in: result, range: range)
-            let heard = firstMatch
-                .flatMap { Range($0.range, in: result) }
-                .map { String(result[$0]) } ?? rule.trigger
+            // What the engine actually produced, per match. Matching is case-insensitive
+            // and ignores separators, so the matched text can differ from the trigger
+            // ("CloudCode" matched by "cloud code") — and it can also already be spelled
+            // exactly as the rule writes it.
+            let heardTexts = matches.compactMap { match in
+                Range(match.range, in: result).map { String(result[$0]) }
+            }
 
             result = rule.regex.stringByReplacingMatches(
                 in: result,
@@ -91,10 +95,17 @@ public struct DictionaryCorrector: Sendable {
                 withTemplate: rule.replacement
             )
 
+            // A rule that only fixes capitalization — "repo" → "Repo" — matches text that
+            // is already correct, because the pattern is case-insensitive. Reporting that
+            // as a correction produced badges reading "Repo → Repo". Only matches whose
+            // text actually differs from what gets written are corrections.
+            let changed = heardTexts.filter { $0 != rule.write }
+            guard let heard = changed.first else { continue }
+
             applied.append(AppliedCorrection(
                 from: heard,
-                to: rule.replacement.replacingOccurrences(of: "\\", with: ""),
-                count: matches
+                to: rule.write,
+                count: changed.count
             ))
         }
 

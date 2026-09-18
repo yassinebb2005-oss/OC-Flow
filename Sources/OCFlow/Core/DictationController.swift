@@ -39,7 +39,21 @@ final class DictationController {
         }
     }
 
-    private(set) var state: State = .idle
+    private(set) var state: State = .idle {
+        didSet {
+            guard oldValue.isActive != state.isActive else { return }
+            onActiveChange?(state.isActive)
+        }
+    }
+
+    /// Called on every transition into and out of an active state.
+    ///
+    /// A direct callback rather than `withObservationTracking`, which fires once and has
+    /// to re-register afterwards: a transition arriving inside that re-registration window
+    /// is missed, and because the re-registration rides on the same signal, missing one
+    /// kills the chain permanently. That is the "worked at first, then stopped" failure —
+    /// the HUD simply stopped being told. `didSet` cannot miss a transition.
+    @ObservationIgnored var onActiveChange: ((Bool) -> Void)?
     /// Live transcript, updated as the engine revises it. Drives the HUD.
     private(set) var transcript = ""
     /// Smoothed 0…1 mic level for the waveform.

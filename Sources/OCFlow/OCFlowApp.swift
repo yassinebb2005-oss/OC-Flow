@@ -58,7 +58,6 @@ struct OCFlowApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let controller = DictationController()
     private var hud: HUDPanel?
-    private var stateObservation: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // A regular app now: dock icon, app menu, standard windows. The HUD is still a
@@ -67,6 +66,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
 
         hud = HUDPanel(controller: controller)
+        controller.onActiveChange = { [weak self] isActive in
+            guard let self else { return }
+            if isActive {
+                self.hud?.present()
+            } else {
+                self.hud?.dismiss()
+            }
+        }
 
         if !controller.activate() {
             Permissions.promptForAccessibility()
@@ -106,7 +113,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        observeState()
         Log.app.info("OC Flow ready — hold \(Settings.shared.pushToTalkKey.displayName) to dictate")
     }
 
@@ -140,23 +146,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let isOpen = NSApp.windows.contains { $0.title == "Engine-Vergleich" && $0.isVisible }
         UserDefaults.standard.set(isOpen, forKey: "comparisonWindowOpen")
         controller.deactivate()
-    }
-
-    /// Shows and hides the HUD in step with the controller's state.
-    private func observeState() {
-        withObservationTracking {
-            _ = controller.state
-        } onChange: { [weak self] in
-            Task { @MainActor in
-                guard let self else { return }
-                if self.controller.state.isActive {
-                    self.hud?.present()
-                } else {
-                    self.hud?.dismiss()
-                }
-                self.observeState()
-            }
-        }
     }
 
     private func retryActivation() {
