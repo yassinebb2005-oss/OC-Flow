@@ -4,6 +4,14 @@ Fünf Minuten, einmalig. Danach: Taste halten, sprechen, loslassen — der Text 
 
 **Voraussetzung:** macOS 26 oder neuer. Prüfen unter  ▸ Über diesen Mac. Steht da eine kleinere Zahl, zuerst macOS aktualisieren.
 
+## Kurzform für Claude-Code-Nutzer
+
+Wer Claude Code auf dem Mac hat, überspringt die Schritte unten: den Text aus
+[PROMPT.md](PROMPT.md) kopieren, in Claude Code einfügen, Enter. Die Installation läuft dann
+von selbst, und du klickst nur noch die Passwort-Fenster und die Berechtigungen weg.
+
+Alle anderen folgen den vier Schritten.
+
 ## Schritt 1: Terminal öffnen
 
 Cmd + Leertaste drücken, „Terminal" tippen, Enter.
