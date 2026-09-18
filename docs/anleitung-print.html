@@ -5,7 +5,7 @@
 <title>O.C. Flow installieren</title>
 <style>
   @page { size: A4; margin: 14mm 16mm 10mm 16mm; }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; hyphens: none; -webkit-hyphens: none; }
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -76,10 +76,9 @@ Text steht da, wo dein Cursor blinkt.</p>
 <div class="req"><strong>Voraussetzung:</strong> macOS 26 oder neuer. Prüfen unter Apfelmenü &#9656; Über diesen Mac. Steht da eine kleinere Zahl, zuerst macOS aktualisieren.</div>
 
 <div class="req" style="background:#eef3ff; border-left-color:#2c5bd8">
-  <strong>Kurzform mit Claude Code:</strong> Wer Claude Code auf dem Mac hat, überspringt die
-  vier Schritte. Im Projekt liegt die Datei <code>PROMPT.md</code> — Text kopieren, in Claude
-  Code einfügen, Enter. Dann bleiben nur die Passwort-Fenster und die Berechtigungen bei dir.
-  Zu finden unter github.com/yassinebb2005-oss/OC-Flow
+  <strong>Kurzform mit Claude Code:</strong> Wer Claude Code auf dem Mac hat, überspringt
+  die vier Schritte. Der fertige Auftrag dafür steht auf der letzten Seite — kopieren,
+  einfügen, Enter.
 </div>
 <div class="step">
   <h2><span class="num">1</span> Terminal öffnen</h2>
@@ -213,6 +212,61 @@ diesem Befehl mit, darin steht, was die App gemacht hat:</p>
   <h2>Fertig</h2>
   <p>Ab jetzt überall: Sprechtaste halten, sprechen, loslassen.</p>
   <p><strong>Hakt etwas?</strong> Siehe oben. Oder frag Yassine.</p>
+</div>
+
+
+<div class="step" style="page-break-before: always">
+<h2><span class="num">★</span> Alternative: von Claude Code installieren lassen</h2>
+<p>Nur für Macs, auf denen Claude Code läuft. Den Text im Kasten komplett markieren, kopieren,
+in Claude Code einfügen, Enter. Dann läuft die Installation von selbst ab.</p>
+<p><strong>Drei Dinge bleiben trotzdem bei dir</strong>, und Claude Code sagt jeweils Bescheid,
+wann es soweit ist: zwei Passwort-Fenster wegklicken, und am Ende die beiden Berechtigungen
+aus Schritt 4 erteilen. Die kann kein Programm für dich klicken, das lässt macOS nicht zu.</p>
+<p style="font-size: 9.2pt; color: #6a6a6e">Klappt das Markieren im PDF nicht sauber: derselbe
+Text steht auch unter <strong>github.com/yassinebb2005-oss/OC-Flow</strong> in der Datei
+<code>PROMPT.md</code>, dort lässt er sich bequemer kopieren.</p>
+<pre style="font-size: 8.2pt; line-height: 1.35; white-space: pre-wrap">Installiere mir bitte O.C. Flow auf diesem Mac, eine Diktier-App. Antworte auf Deutsch und
+erkläre alles in Alltagssprache, ich bin kein Entwickler. Zeig mir keine Fehlermeldungen im
+Rohzustand, sondern sag mir in einem Satz, was los ist und was ich tun soll.
+
+Quelle: https://github.com/yassinebb2005-oss/OC-Flow
+
+Geh so vor und halte die Reihenfolge ein:
+
+1. Prüf mit `sw_vers`, ob macOS 26 oder neuer läuft. Ist es älter, brich ab und sag mir, dass
+   die App erst ab macOS 26 läuft und ich zuerst aktualisieren muss.
+
+2. Prüf mit `xcode-select -p`, ob Apples Entwickler-Werkzeuge da sind. Fehlen sie, starte
+   `xcode-select --install` und sag mir, dass ich im Fenster auf „Installieren&quot; klicken und
+   dir Bescheid geben soll, wenn es fertig ist. Warte dann auf mich.
+
+3. Lösch einen eventuell vorhandenen Ordner `~/OC-Flow` und klon das Repo frisch dorthin.
+
+4. Sag mir, dass jetzt ein Passwort-Fenster aufgeht, und führ dann
+   `bash Tools/create-signing-cert.sh` aus. Das legt ein kostenloses Zertifikat an, damit ich
+   die Berechtigung aus Schritt 7 nur ein einziges Mal erteilen muss. Fragt das Skript im
+   Terminal nach einem Passwort, sag mir das, ich tippe es selbst ein.
+
+5. Sag mir, dass der Schlüsselbund gleich fragt, ob „codesign&quot; den Schlüssel benutzen darf,
+   und dass ich dort auf „Immer erlauben&quot; klicken soll. Führ dann `make install` aus. Das
+   dauert ein paar Minuten.
+
+6. Lies mit `sysctl -n hw.memsize` den Arbeitsspeicher aus. Sind es 8 GB oder weniger, sag
+   mir deutlich: Ich soll im Menüleisten-Menü „Automatisch aufräumen (KI auf dem Gerät)&quot;
+   ausschalten, sonst warte ich pro Satz über zehn Sekunden auf meinen Text. Sind es mehr,
+   sag mir, dass ich es anlassen kann.
+
+7. Zum Schluss erklär mir, was ich jetzt selbst tun muss, in genau dieser Reihenfolge:
+   - In den Systemeinstellungen unter Datenschutz &amp; Sicherheit ▸ Bedienungshilfen den Eintrag
+     „OC Flow&quot; einschalten. Öffne mir diese Seite mit
+     `open &quot;x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility&quot;`.
+   - Die App einmal beenden (O.C. in der Menüleiste ▸ „OC Flow beenden&quot;) und aus dem Ordner
+     Programme neu öffnen.
+   - In ein Textfeld klicken, die rechte ⌥-Taste halten, einen Satz sagen, loslassen. Beim
+     ersten Mal fragt macOS nach dem Mikrofon, das erlauben.
+
+Diese drei Dinge kannst du nicht für mich tun, ich muss sie selbst klicken. Sag mir am Ende
+klar, dass der Rest bei mir liegt, und bleib erreichbar, falls etwas nicht klappt.</pre>
 </div>
 
 <footer>O.C. Flow &#183; Installationsanleitung &#183; github.com/yassinebb2005-oss/OC-Flow</footer>
