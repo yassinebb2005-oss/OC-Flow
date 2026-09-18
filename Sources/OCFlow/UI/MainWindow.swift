@@ -361,10 +361,30 @@ private struct TranscriptionRow: View {
 private struct CorrectionBadges: View {
     let corrections: [AppliedCorrection]
 
+    /// Drops badges whose two sides read the same.
+    ///
+    /// Transcripts recorded before the corrector stopped reporting no-op matches still
+    /// carry them, and "Claude → Claude" is worse than no badge: it reads as a bug in the
+    /// dictionary. Filtering here rather than migrating the history keeps every stored
+    /// transcript untouched.
+    private var real: [AppliedCorrection] {
+        corrections.filter {
+            $0.from.trimmingCharacters(in: .whitespaces) != $0.to.trimmingCharacters(in: .whitespaces)
+        }
+    }
+
     var body: some View {
+        if real.isEmpty {
+            EmptyView()
+        } else {
+            badges
+        }
+    }
+
+    private var badges: some View {
         HStack(spacing: DS.Space.snug) {
             Kicker(text: "Korrigiert")
-            ForEach(corrections, id: \.self) { correction in
+            ForEach(real, id: \.self) { correction in
                 HStack(spacing: DS.Space.tight) {
                     Text(correction.from)
                         .strikethrough()
